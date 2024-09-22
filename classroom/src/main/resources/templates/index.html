@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content="java在线培训机构，java学习，java视频教程">
+    <meta name="description" content="ETJava课堂是高品质的Java视频课程平台。为励志成为Java全栈工程师的程序员们，提供优质的后端技术、前端技术、数据库、服务器视频教程。">
+    <link rel="Shortcut Icon" type="image/x-icon" href="/images/favicon.ico">
+    <title th:text="${application.propertyMap['k1']}+'|'+${application.propertyMap['k2']}"></title>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <!--
+        确保首页宣传图全屏展示
+    -->
+    <style>
+       /* html, body {  width: 100%;  height: 100%;  }
+        #showdiv {  overflow: hidden;  position: absolute;  top: 0; left: 0; right: 0; bottom: 0;  height: 100%;}
+        #background-video {  position: absolute;  top: 50%; left: 50%;  transform: translate(-50%, -50%);  object-fit: cover;  height: 100%; width: 100%;}
+
+        #showdiv{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 9998;!*确保置于顶层*!
+        }
+
+        #christmas{
+            position: absolute;
+            top: 30%;
+            left: 60%;
+            -webkit-transform: translate(-40%, -40%);
+            -moz-transform: translate(-40%, -40%);
+            -ms-transform: translate(-40%, -40%);
+            -o-transform: translate(-40%, -40%);
+            transform: translate(-40%, -40%);
+            font-weight: bold;
+            font-size: 252px;
+            color: #FFFFFF;
+            width: 90%;
+            font-family: AlexeiCopperplate;
+            z-index: 9999;
+        }*/
+    </style>
+</head>
+<body>
+<!--
+    圣诞宣传图
+<div id="showdiv" >
+    <video autoplay muted loop id="background-video">
+        <source src="/video/prehome-desktop.mp4" type="video/mp4">
+    </video>
+    <div id="christmas"></div>
+</div>
+-->
+<!--引入头部 合并到导航栏中
+<div class="header_top" th:include="common/head::#h" />-->
+
+<!--导航栏-->
+<div class="header" th:include="common/menu::#m" />
+
+<!--轮播图-->
+<div class="w1220 carousel" id="contentbody">
+    <div class="w1220 carousel">
+        <div class="layui-carousel" id="test10">
+            <div carousel-item="">
+                <div th:each="carouselArticle:${application.carouselArticleList}">
+                    <a th:href="${carouselArticle.url}" target="_blank">
+                        <img th:src="'/carouselImages/'+${carouselArticle.imageName}">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--课程内容主体-->
+<div class="w1220 course" th:include="common/coursel::#c" />
+
+<!--页面底部-->
+<div class="footer" th:include="common/foot::#f" />
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script>
+    layui.use(['carousel','element','form','table'], function(){
+        var carousel = layui.carousel;
+
+
+        //图片轮播
+        carousel.render({
+            elem: '#test10'
+            ,width: '1210px'
+            ,height: '440px'
+            ,interval: 5000
+            ,arrow: 'none'
+        });
+
+    });
+
+    /*$(function(){
+        showText($('#christmas'), 'Merry Christmas', 0);
+        setTimeout("hidediv()", 3000);
+    });
+    function hidediv(){
+        /!*
+            2000 收起时间 单位毫秒
+            linear匀速移动
+        *!/
+        $("#showdiv").slideUp(5000,"linear");
+    }
+    /!*展示文字内容 100输出文字的速度 单位毫秒*!/
+    function showText(obj, text, i){
+        var timer = setInterval(function(){
+            if(i < text.length){
+                obj.append(text[i]);
+                i++;
+            }else{
+                clearInterval(timer);
+            }
+        }, 100);
+    }*/
+
+
+    function singin(){
+        layer.open({
+            type: 2,
+            title: '系统登录',
+            area: ['500px', '500px'],
+            content: '/forground/common/login.html' //iframe的url
+        });
+    }
+
+    function register(){
+        layer.open({
+            type: 2,
+            title: '用户注册',
+            area: ['500px', '500px'],
+            content: '/forground/common/register.html' //iframe的url
+        });
+    }
+
+    /**
+     * 打开用户个人中心页面
+     */
+    function userInfo(){
+        let uId=$("#uId").val();
+        window.location.href="/userInfo?userId="+uId;
+    }
+
+    // 修改密码
+    function usermodifyPwd(){
+        let uId=$("#uId").val();
+        let userName=$("#curUser").val();
+        layer.open({
+            type: 2,
+            title: '修改密码',
+            area: ['500px', '430px'],
+            content: '/forground/user/modifyUser.html?id='+uId //iframe的url
+        });
+    }
+
+</script>
+
+</body>
+</html>

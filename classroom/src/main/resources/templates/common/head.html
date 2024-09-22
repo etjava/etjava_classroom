@@ -1,0 +1,40 @@
+<meta charset="UTF-8">
+
+<!--
+    头部信息
+        可存放滚动广播
+-->
+<div id="h">
+    <link rel="icon" href="/images/favicon.ico">
+    <span class="tl">
+        <a href="/"><b th:text="${application.propertyMap['k1']}"></b></a> | <span th:text="${application.propertyMap['k2']}"></span>
+    </span>
+    <span class="tr" >
+
+        <!--<span><a  href="/weixinLogin"><img src="/images/weixinlogin.png"/></a></span>&nbsp;&nbsp;-->
+        <span th:if="${session.get('curUser222')==null}"><a href="/qqLogin"><img src="/images/qqlogin.png"/></a>&nbsp;&nbsp;</span>
+        <b th:if="${session.get('curUser222')==null}" th:utext="${application.propertyMap['k3']}"></b>&nbsp;&nbsp;
+        <b th:if="${session.get('curUser222')==null}" th:utext="${application.propertyMap['k17']}"></b>
+        <!--<span id="curUser" th:text="${application.curUser==null?'':application.curUser['curUser'].userName}"></span>-->
+        <input type="hidden" id="uId" th:value="${session.get('curUser222')==null?'':session.get('curUser222').getId()}" >
+        <input type="hidden" id="curUser" th:value="${session.get('curUser222')==null?'':session.get('curUser222').userName}" >
+        <ul th:if="${session.get('curUser222')!=null}" class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right"
+            style="background-color: #e4e4e4; margin-top: -15px;margin-right: 2%">
+<!--        <span th:if="${session.get('curUser222')!=null}"><p th:text="${session.get('curUser222').getUserName()}">AAAAAAAA</p></span>-->
+            <li class="layui-nav-item">
+        <a href="javascript:;">
+            <img th:if="${not #strings.contains(session.get('curUser222').imageName, 'http')}" th:src="'/userImages/'+${session.get('curUser222').imageName}" width="30px;">
+            <img th:if="${#strings.contains(session.get('curUser222').imageName, 'http')}" th:src="${session.get('curUser222').imageName}" width="30px;">
+        </a>
+        <dl class="layui-nav-child">
+          <dd><a href="javascript:;" onclick="userInfo()">个人中心</a></dd>
+          <dd><a href="javascript:;" onclick="usermodifyPwd()">修改密码</a></dd>
+          <dd layadmin-event="logout" style="text-align: center;">
+              <a href="/user/logout">退出</a>
+          </dd>
+        </dl>
+      </li>
+   </ul>
+
+    </span>
+</div>

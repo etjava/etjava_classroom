@@ -1,0 +1,196 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>外部文章</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        .layui-table-body .layui-table-cell{
+            height:50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>外部文章</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div style="padding: 20px">
+            <div class="layui-form">
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">博客名称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="s_blogname"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div>
+                <button class="layui-btn layuiadmin-btn-list" data-type="batchdel" onclick="addBlog()">批量发布</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <button class="layui-btn layui-btn-warm layuiadmin-btn-list" data-type="batchdel" onclick="removeBlog()">批量删除</button>
+            </div>
+        </div>
+        <div>
+            <table width="100%" id="blogListTable" ></table>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+        table.render({
+            elem: '#blogListTable'
+            ,url:'/admin/ext/list'
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', width:60,title: '编号'}
+                ,{field:'title', width:200,title: '博客标题',templet:formatLinkBlog}
+                ,{field:'releaseDate',width:125, title: '发布日期',templet:formatReleaseDate}
+                ,{field:'summary', width:200,title: '摘要信息'}
+                ,{field:'type', width:100,title: '博客类型',templet:formatType}
+                ,{field:'state', width:100,title: '状态',templet:formatState}
+                ,{field:'reads', width:100,title: '浏览量'}
+                ,{field:'action', width:300, title: '操作',align:'center',templet:formatAction}
+            ]]
+            ,page: true
+        });
+
+    });
+
+
+    function search(){
+        var s_blogname=$("#s_blogname").val();
+        table.reload("blogListTable",{
+            page:{
+                curr:1
+            }
+            ,where:{
+                s_blogname:s_blogname
+            }
+        })
+    }
+
+    function deleteOne(id){
+        layer.confirm('您确定要删除这条记录吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮 - 有几个按钮就要写几个function 按顺序对应
+        }, function(){ // 确定按钮
+            layer.closeAll('dialog');
+            $.post("/admin/blog/delete",{"id":id},function(result){
+                if(result.success){
+                    layer.msg("删除成功！");
+                    table.reload("blogListTable",{});
+                }else{
+                    layer.msg("删除失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){ // 取消按钮
+            // 点击取消时的操作
+        });
+    }
+
+    function addBlog(){
+        window.parent.openPage('blog/addBlog.html');
+    }
+
+    function modifyBlog(id){
+        window.parent.openPage('blog/addBlog.html?id='+id);
+    }
+
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifyBlog("+d.id+")'><i class='layui-icon layui-icon-edit'></i>查看博客</button>" +
+            "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='sendBlog("+d.id+")'><i class='layui-icon layui-icon-edit'></i>发布</button>" +
+            "<button class='layui-btn layui-btn-warm layui-btn-xs' onclick='deleteOne("+d.id+")'><i class='layui-icon layui-icon-delete' ></i>删除</button>";
+    }
+    function formatLinkBlog(d){
+        return "<a target='_blank' href='/ext/article/"+d.id+"'>"+d.title+"</a>";
+    }
+
+
+
+    function formatType(d) {
+        return d.blogType.typeName;
+    }
+
+    function formatState(d){
+        if(d.state=='1'){
+            return "<font color=blue>已发布</font>";
+        }else if(d.state=='0'){
+            return "<font color=green>未发布</font>";
+        }else if(d.state=='3'){
+            return "<font color=red>已删除</font>";
+        }
+    }
+
+    /*发布博客*/
+    function sendBlog(id){
+        layer.confirm('您确定要发布这条文章吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮 - 有几个按钮就要写几个function 按顺序对应
+        }, function(){ // 确定按钮
+            layer.closeAll('dialog');
+            $.post("/admin/ext/save",{"id":id,"state":1},function(result){
+                if(result.success){
+                    layer.msg("发布成功！");
+                    table.reload("blogListTable",{});
+                }else{
+                    layer.msg("发布失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){ // 取消按钮
+            // 点击取消时的操作
+        });
+    }
+
+    function formatReleaseDate(d){
+        if(d.releaseDate!=null){
+            let formattedDate = formatTime(new Date(d.releaseDate));
+            return formattedDate;
+        }
+        return "";
+    }
+
+    /*格式化时间*/
+    function formatTime(date) {
+        let year = date.getFullYear(); // 获取年份
+        let month = date.getMonth() + 1; // 获取月份（注意要加1，月份从0开始）
+        let day = date.getDate(); // 获取日期
+        let hour = date.getHours(); // 获取小时
+        let minute = date.getMinutes(); // 获取分钟
+        let second = date.getSeconds(); // 获取秒数
+
+        // 格式化为指定的字符串形式（例如：2022-01-15 14:30:00）
+        let formattedTime = year + '-' + addLeadingZero(month) + '-' + addLeadingZero(day) + ' ' + addLeadingZero(hour) + ':' + addLeadingZero(minute) + ':' + addLeadingZero(second);
+
+        return formattedTime;
+    }
+
+    // 内置函数：如果数值小于10，在前面加0
+    function addLeadingZero(num) {
+        return num < 10 ? '0' + num : num;
+    }
+</script>
+</body>
+</html>

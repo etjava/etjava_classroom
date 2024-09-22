@@ -1,0 +1,118 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加或者修改试卷</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <style type="text/css">
+
+        table tr td{
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post" id="myForm222">
+        <table>
+            <tr>
+                <td>试卷名称：</td>
+                <td><input type="text" id="paperName" name="paperName" class="layui-input" style="width: 300px"/></td>
+            </tr>
+            <tr>
+                <td>选择课程：</td>
+                <td>
+                    <input type="text" id="courseName" readonly onclick="openData()" name="course.name" placeholder="选择课程" class="layui-input" style="width: 300px"/>
+                    <input type="hidden" id="courseId" readonly name="course.id" class="layui-input" style="width: 300px"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td><button class="layui-btn" onclick="submitData();return false;">提交</button></td>
+                <td><font id="errorInfo" color="red"></font></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+    layui.use(['element','form'], function(){
+        var form = layui.form;
+    });
+
+    function openData(){
+        layer.open({
+            type: 2,
+            title: '选择课程',
+            area: ['600px', '400px'],
+            content: '/admin/paper/queryCourse.html' //iframe的url
+        });
+    }
+
+    function submitData(){
+        var paperName=$("#paperName").val().trim();
+        var courseId=$("#courseId").val();
+        if(paperName=="") {
+            $("#errorInfo").text("试卷名称不能为空！");
+            $("paperName").focus();
+            return false;
+        }
+
+        var id=getQueryVariable("id");
+        if(id){
+            $.post("/admin/paper/save",{id:id,paperName:paperName,"course.id":courseId},function(result){
+                if(result.success){
+                    layer.alert('修改成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    $("#errorInfo").text(result.errorInfo);
+                }
+            },"json");
+        }else{
+            $.post("/admin/paper/save",{paperName:paperName,"course.id":courseId},function(result){
+                if(result.success){
+                    layer.alert('添加成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    $("#errorInfo").text(result.errorInfo);
+                }
+            },"json");
+        }
+    }
+
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+   $(function(){
+        var id=getQueryVariable("id");
+        if(id){
+            $.post("/admin/paper/findById",{id:id},function(result){
+                if(result.success){
+                    var paper=result.paper;
+                    $("#paperName").val(paper.paperName);
+                    $("#courseId").val(paper.course.id);
+                    $("#courseName").val(paper.course.name);
+                }else{
+                    layer.alert('服务器加载有问题，请联系管理员！');
+                }
+            },"json");
+        }
+    });
+
+
+</script>
+</body>
+</html>

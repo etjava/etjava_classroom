@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>修改密码</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+</head>
+<body>
+
+<div style="padding: 20px;text-align: center">
+     <span>
+        <img src="/images/logo2.png">
+    </span>
+    <div style="padding-top: 20px;">
+        <div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户账号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="userName" id="userName" readonly autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="password" id="password" required lay-verify="required" placeholder="请输入原密码" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">新密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="newPassword" id="newPassword" required lay-verify="required" placeholder="请输入新密码" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">确认新密码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="reNewPassword" id="reNewPassword" required lay-verify="required" placeholder="请输入新密码" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="reset" id="rest-btn" class="layui-btn layui-btn-primary">重置</button>
+                    <button class="layui-btn" id="reg-btn">修改</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script>
+    layui.use('form', function(){
+        var form = layui.form;
+    });
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+    $(function (){
+        let uId = getQueryVariable("id");
+
+        if(uId){
+            $.post("/user/findById",{id:uId},function(result){
+                if(result.success){
+                    var user=result.user;
+                    $("#userName").val(user.userName);
+                }else{
+                    layer.alert("服务器加载有问题，请联系管理员！");
+                }
+            },"json");
+        }
+    });
+
+    $(document).ready(function(){
+        $("#reg-btn").click(function(){
+            let userName = $("#userName").val();
+            let password = $("#password").val();
+            let newPassword = $("#newPassword").val();
+            let reNewPassword = $("#reNewPassword").val();
+            let uId = getQueryVariable("id");
+            if(userName==''){
+                layer.msg("用户名不能为空");
+                return;
+            }
+            if(password==''){
+                layer.msg("原密码不能为空");
+                return;
+            }
+
+            if(reNewPassword==''){
+                layer.msg("确认新密码不能为空");
+                return;
+            }
+            if(reNewPassword!=newPassword){
+                layer.msg("新密码和确认新密码不一致");
+                return;
+            }
+            $.post("/user/modifyPassword",{id:uId,userName:userName,password:password,newPassword:newPassword},function(result){
+                if(result.success){
+                    layer.alert('修改成功 下次登录生效',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    layer.alert(result.errorInfo);
+                }
+            },"json");
+        });
+
+
+        $("#rest-btn").click(function(){
+            $("#userName").val('');
+            $("#password").val('');
+            $("#email").val('');
+        });
+    });
+</script>
+</body>
+</html>

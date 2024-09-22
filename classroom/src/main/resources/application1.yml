@@ -1,0 +1,50 @@
+spring:
+  profiles:
+    active: dev
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:/ehcache.xml
+
+
+# 轮播图
+carouselImages: file:D:\classroomImages\carouselImages\
+# 课程中图片 - ckeditor中上传的图片
+courseImages: file:D:\classroomImages\courseImages\
+teacherImages: file:D:\classroomImages\teacherImages\
+systemImages: file:D:\classroomImages\systemImages\
+articleImages: file:D:\classroomImages\articleImages\
+# 用户头像
+userImages: file:D:\classroomImages\userImages\
+# 爬取的内容中图片映射
+crawlerImages: file:D:\classroomImages\crawlerImages\
+# 轮播图片上传路径
+carouselImageFilePath: D:\classroomImages\carouselImages\
+# 图片上传路径 image upload path
+courseImages2: D:\classroomImages\courseImages\
+
+
+
+# 课程和自定义帖子中的图片上传路径   course images path
+imageFilePath: D:\classroomImages\articleImages\
+# 讲师头像上传
+teacherImageFilePath: D:\classroomImages\teacherImages\
+# 用户头像上传
+userImageFilePath: D:\classroomImages\userImages\
+
+# 自动添加图片  Automatically add Pictures
+auto.filepath: D:\classroomImages\coursemodel.jpg\ # original image
+auto.targetpath: D:\classroomImages\courseImages\ # target image
+
+
+# 要爬取的网站
+website: https://www.cnblogs.com/
+
+userName2:
+sysPwd:
+
+
+realPath: D:\classroomImages\crawlerImages\
+cacheFilePath: C://ehcache.xml
+imageUrl: /crawlerImages/
+

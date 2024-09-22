@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加博客</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        table tr td{
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>发布博客</cite></a>
+			</span>
+</div>
+
+
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">博客标题：</label>
+            <div class="layui-input-block">
+                <input type="text" id="title" name="title" placeholder="请输入博客标题"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">博客类别：</label>
+            <div class="layui-input-inline">
+                <select id="blogTypeId" name="blogType.id" class="layui-input" style="width: 360px" placeholder="请选择博客类别" lay-filter="blogTypeId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">阅读次数：</label>
+            <div class="layui-input-inline">
+                <input type="hidden" id="bId" >
+                <input type="text" id="reads" name="reads" value="100" placeholder="请输入初始阅读次数"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">博客内容：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="content" name="content" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" onclick="submitData();return false;">提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+
+
+    // 保存到临时变量中 最后统一提交
+    blogTypeId=-1; // 课程类别ID
+
+
+    layui.use(['element','form'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        Promise.all([
+            /*给下拉框绑定数据*/
+            $.post("/admin/blogType/list",{},function(result){
+                if(result.code==0){
+                    $("#blogTypeId").prepend("<option value='-1'>请选择博客类别</option>");//添加第一个option值
+                    for (var i = 0; i < result.data.length; i++) {
+                        $("#blogTypeId").append("<option value='" + result.data[i].id + "'>" + result.data[i].typeName + "</option>");
+                    }
+                    layui.form.render("select");
+                }else{
+                    layer.alert("服务器加载有问题，请联系管理员！");
+                }
+            },"json"),
+
+        form.on('select(blogTypeId)', function(data){
+            console.log(data.value);
+            blogTypeId=data.value;
+        })
+        ]).then(function (results){
+            var id=getQueryVariable("id");
+            if(id){
+                $("#bId").val(id);
+                // 获取博客信息
+                $.post("/admin/blog/findById",{id:id},function(result){
+                    if(result.success){
+                        var blog=result.blog;
+                        $("#title").val(blog.title);
+                        // 必须要等待上边都加载完成后才能执行下拉框的选中操作
+                        $("#blogTypeId").find("option[value="+blog.blogType.id+"]").prop("selected",true);
+                        blogTypeId=blog.blogType.id;
+                        $("#reads").val(blog.reads);
+
+
+                        // 解决页面多次调用 ，就会出现多个editor
+                        var editor;
+                        //加载CKeditor
+                        //判定 Content 是否存在
+                        if(!CKEDITOR.instances['content']){
+                            editor = CKEDITOR.replace('content');
+                        }else{
+                            CKEDITOR.instances.content.destroy();
+                            CKEDITOR.replace('content');
+                        }
+                        CKEDITOR.instances.content.setData(blog.content);
+                        layui.form.render("select");// 选中下拉框
+                        //console.log(blog);
+                    }else{
+                        layer.alert("服务器加载有问题，请联系管理员！");
+                    }
+                },"json");
+            }
+        })
+    });
+
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+    function submitData(){
+        var id = $("#bId").val();
+
+        var title=$("#title").val().trim();
+
+        var reads=$("#reads").val().trim();
+        var content=CKEDITOR.instances.content.getData();
+        //var html = CKEDITOR.instances['content'].getData();
+        var noLabelContent = $('<div/>', { html: content }).text();
+        // CKEDITOR.instances['content'].on('blur', function() {// 失去焦点时触发
+        //     var html = CKEDITOR.instances['content'].getData();
+        //     noLabelContent = $('<div/>', { html: html }).text();
+        //    // alert(noLabelContent.substring(0, 300));
+        //    // alert(html);
+        // });
+        noLabelContent = noLabelContent.substring(0, 300);
+        if(title==""){
+            layer.alert("请输入博客标题！");
+            return false;
+        }
+        if(blogTypeId==-1){
+            layer.alert("请选择博客类别！");
+            return false;
+        }
+
+        if(reads=="") {
+            layer.alert("请输入阅读次数！");
+            return false;
+        }
+        if (!(/(^[0-9]\d*$)/.test(reads))) {
+            layer.alert("阅读次数必须是0或者正整数！");
+            return false;
+        }
+
+        if(content=="") {
+            layer.alert("请输入博客内容！");
+            return false;
+        }
+        $.post("/admin/blog/save",{id:id,title:title,summary:noLabelContent,'blogType.id':blogTypeId,reads:reads,content:content},function(result){
+            if(result.success){
+                layer.alert('添加成功！',function () {
+                    window.parent.openPage('blog/blogManage.html');
+                });
+            }else{
+                layer.alert(result.errorInfo);
+            }
+        },"json");
+    }
+</script>
+</body>
+</html>

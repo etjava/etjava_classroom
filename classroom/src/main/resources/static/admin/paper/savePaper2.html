@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加或者修改试卷</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <style type="text/css">
+
+        table tr td{
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post" >
+        <table>
+            <tr>
+                <td>试卷名称：</td>
+                <td><input type="text" id="paperName" name="paperName" class="layui-input" style="width: 300px"/></td>
+            </tr>
+            <tr>
+                <td>选择课程：</td>
+                <td>
+                    <div class="layui-input-inline">
+                        <select id="courseId" name="course.id" class="layui-input" style="width: 360px" placeholder="请选择课程" lay-filter="courseId">
+                        </select>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td><button class="layui-btn" onclick="submitData();return false;">提交</button></td>
+                <td><font id="errorInfo" color="red"></font></td>
+            </tr>
+        </table>
+    </form>
+</div>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    courseId=-1;
+
+    layui.use(['element','form'], function(){
+        var form = layui.form;
+        var element = layui.element;
+        $.post("/admin/course/list2",{},function(result){
+            if(result.code==0){
+                $("#courseId").prepend("<option value='-1'>请选择课程</option>");//添加第一个option值
+                for (var i = 0; i < result.data.length; i++) {
+                    $("#courseId").append("<option value='" + result.data[i].id + "'>" + result.data[i].name + "</option>");
+                }
+                layui.form.render("select");
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+
+        form.on('select(courseId)', function(data){
+            console.log(data.value);
+            courseId=data.value;
+        });
+    });
+
+    function submitData(){
+        var paperName=$("#paperName").val().trim();
+        if(paperName=="") {
+            $("#errorInfo").text("试卷名称不能为空！");
+            $("paperName").focus();
+            return false;
+        }
+
+        var id=getQueryVariable("id");
+        if(id){
+            $.post("/admin/paper/save",{id:id,paperName:paperName,"course.id":courseId},function(result){
+                if(result.success){
+                    layer.alert('修改成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    $("#errorInfo").text(result.errorInfo);
+                }
+            },"json");
+        }else{
+            $.post("/admin/paper/save",{paperName:paperName,"course.id":courseId},function(result){
+                if(result.success){
+                    layer.alert('添加成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    $("#errorInfo").text(result.errorInfo);
+                }
+            },"json");
+        }
+    }
+
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+   /* $(function(){
+
+        var id=getQueryVariable("id");
+
+        if(id){
+            $.post("/admin/source/findById",{id:id},function(result){
+                if(result.success){
+                    var source=result.source;
+                    $("#title").val(source.title);
+                    $("#password").val(source.password);
+                    $("#source").val(source.source);
+                    $("#downloadAddress").val(source.downloadAddress);
+                    $("#extract").val(source.extract);
+                }else{
+                    layer.alert('服务器加载有问题，请联系管理员！');
+                }
+            },"json");
+        }
+    });*/
+
+
+</script>
+</body>
+</html>

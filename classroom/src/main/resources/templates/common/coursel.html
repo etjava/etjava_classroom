@@ -1,0 +1,88 @@
+<meta charset="UTF-8">
+<div id="c">
+    <!--好课推荐-->
+    <ul>
+        <h3 class="course_title"><img src="images/item.png"> 好<span></span>课<span></span>推<span></span>荐</h3>
+        <div class="course_item" th:each="hktj:${application.hktjList}">
+            <a target="_blank" th:href="'/course/'+${hktj.id}">
+                <b class="img">
+                    <img class="lazy" th:src="'/courseImages/'+${hktj.imageName}" th:alt="${hktj.name}" style="display: inline;">
+                </b>
+
+                <div class="content">
+                    <h5 th:title="${hktj.name}" th:text="${hktj.name}"></h5>
+                    <p class="word">
+                        <span th:if="${hktj.type=='free'}" class="free">免费</span>
+                        <span th:if="${hktj.type=='vip'}" class="vip">会员</span>
+                        <span class="ren"><i class="fa fa-eye"></i>&nbsp;<l th:text="${hktj.view}"></l></span>
+                    </p>
+                </div>
+            </a>
+        </div>
+    </ul>
+
+
+    <!--最新课程-->
+    <ul>
+        <h3 class="course_title"><img src="images/item.png">最<span></span>新<span></span>课<span></span>程</h3>
+        <div class="course_item" th:each="zxkc:${application.zxkcList}">
+            <a target="_blank" th:href="'/course/'+${zxkc.id}">
+                <b class="img">
+                    <img class="lazy" th:src="'/courseImages/'+${zxkc.imageName}" th:alt="${zxkc.name}" style="display: inline;">
+                </b>
+
+                <div class="content">
+                    <h5 th:title="${zxkc.name}" th:text="${zxkc.name}"></h5>
+                    <p class="word">
+                        <span th:if="${zxkc.type=='free'}" class="free">免费</span>
+                        <span th:if="${zxkc.type=='vip'}" class="vip">会员</span>
+                        <span class="ren"><i class="fa fa-eye"></i>&nbsp;<l th:text="${zxkc.view}"></l></span>
+                    </p>
+                </div>
+            </a>
+        </div>
+    </ul>
+
+
+    <!--免费课程-->
+    <ul>
+        <h3 class="course_title"><img src="images/item.png"> 免<span></span>费<span></span>课<span></span>程</h3>
+        <div class="course_item" th:each="mfkc:${application.freeList}">
+            <a target="_blank" th:href="'/course/'+${mfkc.id}">
+                <b class="img">
+                    <img class="lazy" th:src="'/courseImages/'+${mfkc.imageName}" th:alt="${mfkc.name}" style="display: inline;">
+                </b>
+
+                <div class="content">
+                    <h5 th:title="${mfkc.name}" th:text="${mfkc.name}"></h5>
+                    <p class="word">
+                        <span th:if="${mfkc.type=='free'}" class="free">免费</span>
+                        <span th:if="${mfkc.type=='vip'}" class="vip">会员</span>
+                        <span class="ren"><i class="fa fa-eye"></i>&nbsp;<l th:text="${mfkc.view}"></l></span>
+                    </p>
+                </div>
+            </a>
+        </div>
+    </ul>
+
+    <!--实战课程-->
+    <ul>
+        <h3 class="course_title"><img src="images/item.png"> 实<span></span>战<span></span>推<span></span>荐</h3>
+        <div class="course_item" th:each="szkc:${application.szkcList}">
+            <a target="_blank" th:href="'/course/'+${szkc.id}">
+                <b class="img">
+                    <img class="lazy" th:src="'/courseImages/'+${szkc.imageName}" th:alt="${szkc.name}" style="display: inline;">
+                </b>
+
+                <div class="content">
+                    <h5 th:title="${szkc.name}" th:text="${szkc.name}"></h5>
+                    <p class="word">
+                        <span th:if="${szkc.type=='free'}" class="free">免费</span>
+                        <span th:if="${szkc.type=='vip'}" class="vip">会员</span>
+                        <span class="ren"><i class="fa fa-eye"></i>&nbsp;<l th:text="${szkc.view}"></l></span>
+                    </p>
+                </div>
+            </a>
+        </div>
+    </ul>
+</div>

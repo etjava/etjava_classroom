@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.BlogTypeMapper">
+
+    <select id="list" parameterType="Map" resultType="BlogType">
+        select * from t_blogtype order by sort asc
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultType="BlogType">
+        select * from t_blogtype where id=#{id}
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Long">
+        select count(*) from t_blogtype
+    </select>
+
+    <insert id="add" parameterType="BlogType" >
+        insert into t_blogtype values(null,#{typeName},#{sort})
+    </insert>
+
+    <update id="modify" parameterType="BlogType">
+        update t_blogtype
+        <set>
+            <if test="typeName!=null">
+                typeName=#{typeName},
+            </if>
+            <if test="sort!=null">
+                sort=#{sort},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="remove" parameterType="Integer">
+        delete from t_blogtype where id=#{id}
+    </delete>
+
+
+</mapper>

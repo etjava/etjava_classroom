@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.UserMapper">
+
+    <insert id="add" parameterType="User">
+        insert into t_user values(null,#{userName},#{password},#{email},now(),#{type},1,#{imageName},
+                                  #{openid},now(),#{ipaddr},#{addr});
+    </insert>
+
+    <update id="modify" parameterType="User">
+        update t_user
+        <set>
+            <if test="password!=null">
+                password=#{password},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
+            <if test="type!=null">
+                type=#{type},
+            </if>
+            <if test="state!=null">
+                state=#{state},
+            </if>
+            <if test="imageName!=null">
+                imageName=#{imageName},
+            </if>
+            <if test="lastLoginDate!=null">
+                lastLoginDate=#{lastLoginDate},
+            </if>
+            <if test="ipaddr!=null">
+                ipaddr=#{ipaddr},
+            </if>
+            <if test="addr!=null">
+                addr=#{addr},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="findById" parameterType="Integer" resultType="User">
+        select * from t_user where id=#{id}
+    </select>
+    <select id="list" parameterType="Map" resultType="User">
+        select * from t_user
+        <where>
+            <if test="userName!=null">
+                and userName like concat('%',#{userName},'%')
+            </if>
+        </where>
+        order by registerDate desc
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+    
+    <select id="total" parameterType="Map" resultType="Long">
+        select count(1) from t_user
+        <where>
+            <if test="userName!=null">
+                and userName like concat('%',#{userName},'%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="login" parameterType="User" resultType="User">
+        select * from t_user where userName=#{userName} and password=#{password} and state=1
+    </select>
+
+    <select id="findByOpenId" parameterType="String" resultType="User">
+        select * from t_user where openid=#{openid}
+    </select>
+    
+    <select id="findByUserName" parameterType="String" resultType="User">
+        select * from t_user where userName like concat('%',#{userName},'%')
+    </select>
+</mapper>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>毕设课题管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        .layui-table-body .layui-table-cell{
+            height:50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 35px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>毕设课题管理</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div style="padding: 20px;text-align: center">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <label class="layui-form-label">课题名称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="s_coursename"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div>
+                <button class="layui-btn layuiadmin-btn-list" data-type="batchdel" onclick="addCourse()">添加课题</button>
+            </div>
+        </div>
+        <div>
+            <table width="100%" id="courseListTable" ></table>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+        table.render({
+            //id: 'id', // 隐藏id列 如果是多列 使用逗号隔开 如 id: 'id,username' 需要同时讲cols中对应的id列注释掉
+            elem: '#courseListTable'
+            //,skin: 'row' // 设置表格为紧凑风格
+            //,even: true // 开启偶数行背景
+            ,size:'sm' // sm 小尺寸   lg 大尺寸
+            ,url:'/admin/graduation/list'
+            ,cols: [[
+                {field: 'id', title: '序号', width:80, sort: true, fixed: 'left',align:'center'}
+                ,{field: 'courseName', title: '课题名称', width:306}
+                ,{field: 'courseType', title: '技术类型', width:201}
+                ,{field: 'courseUrl', title: '下载连接地址', width: 200,align:'center',templet: formatCourseUrl}
+                ,{field: 'isVip', title: '会员?', width: 80, sort: true,align:'center',templet: function(d){
+                    return d.isVip == '0' ? '否' : '是';
+                    }}
+                ,{field: 'state', title: '资源状态', width: 80,align:'center',templet: function(d){
+                    return d.state == '0' ? '失效' : '正常';
+                    }}
+                ,{field: 'downloads', title: '下载次数',align:'center', width: 135, sort: true}
+                ,{field:'action',align:'center', title: '操作', width: 150,templet:formatAction}
+            ]]
+            ,page: true
+        });
+
+
+    });
+    function formatCourseUrl(d){
+        return d.courseUrl == null ? '<font color="red">暂无下载地址</font>' : '<a onclick="downloadCourse('+d.id+')" href="javascript:;">'+d.courseName+'</a>';
+    }
+    // 点击下载资源
+    function downloadCourse(id){
+        layer.msg("id="+id+" 下载功能后期维护");
+    }
+
+
+    function search(){
+        var s_coursename=$("#s_coursename").val();
+        table.reload("courseListTable",{
+            page:{
+                curr:1
+            }
+            ,where:{
+                s_coursename:s_coursename
+            }
+        })
+    }
+
+    function addCourse(){
+        layer.open({
+            type: 2,
+            title: '添加课题信息',
+            area: ['800px', '500px'],
+            content: '/admin/graduation/addGraduation.html' //iframe的url
+        });
+    }
+
+    // 禁用
+    function prohibitGraduation(id){
+        layer.confirm('您确定要禁用这个课题吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮 - 有几个按钮就要写几个function 按顺序对应
+        }, function(){ // 确定按钮
+            layer.closeAll('dialog');
+            $.post("/admin/graduation/prohibit",{"id":id},function(result){
+                if(result.success){
+                    layer.msg("操作成功！");
+                    // 重新加载表格数据
+                    table.reload("courseListTable",{});
+                }else{
+                    layer.msg(result.errorInfo);
+                }
+            },"json");
+        }, function(){ // 取消按钮
+            // 点击取消时的操作
+        });
+    }
+
+    // 修改课题信息
+    function modifyGraduation(id){
+        layer.open({
+            type: 2,
+            title: '修改课题信息',
+            area: ['800px', '500px'],
+            content: '/admin/graduation/addGraduation.html?id='+id //iframe的url
+        });
+    }
+
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifyGraduation("+d.id+")'><i class='layui-icon layui-icon-edit'></i>修改</button>" +
+            "<button class='layui-btn layui-btn-danger layui-btn-xs' onclick='prohibitGraduation("+d.id+")'><i class='layui-icon layui-icon-close-fill'></i>禁用</button>"
+    }
+
+
+
+
+</script>
+</body>
+</html>

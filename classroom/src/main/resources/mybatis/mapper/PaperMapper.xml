@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.PaperMapper">
+    
+    <resultMap id="PaperResult" type="Paper">
+        <association property="course" column="courseId" select="com.etjava.mapper.CourseMapper.findById"></association>
+    </resultMap>
+    <insert id="add" parameterType="Paper">
+        insert into t_paper values(null,#{paperName},#{course.id},now())
+    </insert>
+    <update id="modify" parameterType="Paper">
+        update t_paper
+        <set>
+            <if test="paperName!=null">
+                paperName=#{paperName},
+            </if>
+            <if test="course!=null and course.id!=null">
+                courseId=#{course.id},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    
+    <delete id="remove" parameterType="Integer">
+        delete from t_paper where id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="Integer" resultMap="PaperResult">
+        select * from t_paper where id=#{id}
+    </select>
+    
+    <select id="list" parameterType="Map" resultMap="PaperResult">
+        select * from t_paper
+        <where>
+            <if test="paperName!=null">
+                and paperName like concat('%',#{paperName},'%')
+            </if>
+        </where>
+        order by joinDate desc
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Integer">
+        select count(1) from t_paper
+        <where>
+            <if test="paperName!=null">
+                and paperName like concat('%',#{paperName},'%')
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

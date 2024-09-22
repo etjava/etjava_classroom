@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>菜单管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+</head>
+<body>
+
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>菜单管理</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div>
+            <div>
+                <button class="layui-btn layuiadmin-btn-list" data-type="batchdel" onclick="addMenu()">添加</button>
+            </div>
+        </div>
+        <div>
+            <table width="100%" id="menuListTable" ></table>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+
+        table.render({
+            elem: '#menuListTable'
+            ,url:'/admin/menu/list'
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', width:100,align:'center',title: '编号'}
+                ,{field:'name', width:200,title: '菜单名称'}
+                ,{field:'url',width:180,title: '菜单地址'}
+                ,{field:'isShow',width:150,align:'center',title: '是否显示',templet:formatShow}
+                ,{field:'sort', width:100, title: '排列序号',align:'center'}
+                ,{field:'action',  title: '操作',align:'center',templet:formatAction}
+            ]]
+        });
+
+
+    });
+
+    function formatShow(d){
+        return d.isShow==1?"是":"否"
+    }
+
+    /*禁用按钮*/
+    function prohibitMenu(id){
+        layer.confirm('您确定要禁用这个菜单按钮吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮
+        }, function(){
+            layer.closeAll('dialog');
+            $.post("/admin/menu/prohibitMenu",{"id":id},function(result){
+                if(result.success){
+                    layer.msg("操作成功！");
+                    table.reload("menuListTable",{});
+                }else{
+                    layer.msg("删除失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){
+
+        });
+    }
+    /*删除按钮*/
+    function deleteOne(id){
+        layer.confirm('您确定要删除这条记录吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮
+        }, function(){
+            layer.closeAll('dialog');
+            $.post("/admin/menu/deleteMenu",{"id":id},function(result){
+                if(result.success){
+                    layer.msg("删除成功！");
+                    table.reload("menuListTable",{});
+                }else{
+                    layer.msg("删除失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){
+
+        });
+    }
+
+    function addMenu(){
+        layer.open({
+            type: 2,
+            title: '添加菜单',
+            area: ['500px', '500px'],
+            content: '/admin/menu/saveMenu.html' //iframe的url
+        });
+    }
+
+    function modifyMenu(id){
+        layer.open({
+            type: 2,
+            title: '修改菜单',
+            area: ['500px', '500px'],
+            content: '/admin/menu/saveMenu.html?id='+id //iframe的url
+        });
+    }
+
+
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-primary layui-btn-xs' onclick='modifyMenu("+d.id+")'><i class='layui-icon layui-icon-edit'></i>编辑</button>" +
+            "<button class='layui-btn layui-btn-primary layui-btn-xs' onclick='prohibitMenu("+d.id+")'><i class='layui-icon layui-icon-close-fill' ></i>禁用</button>"+
+            "<button class='layui-btn layui-btn-primary layui-btn-xs' onclick='deleteOne("+d.id+")'><i class='layui-icon layui-icon-delete' ></i>删除</button>";
+    }
+
+
+
+</script>
+</body>
+</html>

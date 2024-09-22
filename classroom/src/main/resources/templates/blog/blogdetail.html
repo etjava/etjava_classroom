@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8"/>
+<link rel="icon" href="/images/favicon.ico">
+<meta name="keywords" th:content="${title}">
+<meta name="description" th:content="${title}">
+<link href="/images/favicon.ico" rel="SHORTCUT ICON">
+<title th:text="${application.propertyMap['k19']}+'|'+${application.propertyMap['k1']}"></title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/share.min.css">
+
+<link rel="stylesheet" href="/ckeditor/highlight11.6/default.min.css">
+<script src="/ckeditor/highlight11.6/highlight.min.js"></script>
+
+<!-- code高亮模块CSS -->
+<link rel="stylesheet" type="text/css"
+      href="/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css" />
+<!-- code高亮模块JS -->
+<script type="text/javascript"
+        src="/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js"></script>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<a href=“JavaScript:scroll（0,0）”>返回顶部</a>
+<div class="header" th:include="common/menu::#m" />
+
+<div class="layui-container" id="contentbody">
+    <div class="layui-collapse">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="courseList_body">
+                    <div class="w1220 searchContent">
+                        <ul>
+                            <li class="li_3">
+                                <div style="text-align: center;">
+                                    <!--<span style="font-weight: bold">搜索：</span>-->
+                                    <form class="layui-form" action="/blog/list/1" method="post">
+                                        <input type="text" th:value="${s_blogname}" name="s_blogname" style="height: 40px;width: 40%"  placeholder="请输入您要搜索的文章 " autocomplete="off" class="layui-input s_input" >
+                                        <input type="submit" class="layui-btn layui-btn-radius " value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;搜索&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ">
+                                    </form>
+                                </div>
+                            </li>
+                            <li style="margin-top:30px;width: 93%; word-break:break-all; font-size: 18px;">
+                                <div class="layui-colla-item" >
+                                    <h2 class="layui-colla-title" style="background-color: honeydew;width: 50px;font-weight: bold">类别</h2>
+                                    <div class="layui-colla-content layui-show"><!--layui-show 默认展开选项卡-->
+                                        <dd>
+                                            <a onclick="selectTypeId(0)"><span id="typeId_0" class="opt">全部</span></a>
+                                        </dd>
+                                        <!--
+                                            用 th:with 定义局部变量 colSize 和 rowSize ， 变量作用域在它所在的 table 之内。
+                                            colSize=5 表示每行显示5五个，超过则换行，
+                                            rowSize 行数，通过blogTypeList的总数和colSize计算出来。
+                                        -->
+                                        <table th:with="colSize=${9},
+                                            rowSize=${application.blogTypeList.size()/colSize},
+                                            rowSize=${(application.blogTypeList.size()%colSize==0 ? rowSize : (rowSize+1))}">
+                                            <!--遍历行数，rowIdx为行号，每一行是一个tr标签对 -->
+                                            <tr th:if="${application.blogTypeList.size() gt 0}" th:each="rowIdx:${#numbers.sequence(1, rowSize)}">
+                                                <!--遍历列数，colIdx为列号，每一列是一个td标签对 -->
+                                                <td th:each="colIdx:${#numbers.sequence(1,colSize)}">
+                                                    <!-- 根据行号和列号计算数组的下标索引号idx ,然后通过idx从blogTypeList中取出一个元素blogType
+                                                    由于最后一行的数据可能没有满行（blogTypeList.size()%colSize!=0的情况），因此需要做数组越界判断， -->
+                                                    <!-- th:block 功能标签，标签本身不会输出为一个html元素，此处只是用来配合 th:with -->
+                                                    <th:block th:with="idx=${(rowIdx-1)*colSize+colIdx-1},
+                                                        blogType=${idx<application.blogTypeList.size() ? application.blogTypeList[idx] : null}">
+                                                        <!-- th:if 决定是否输出 input 标签：user不是空指针才输出 -->
+                                                        <a th:if="${blogType ne null}" th:onclick="selectTypeId('[[${blogType.id}]]')" >
+                                                            <span th:id="'typeId_'+${blogType.id}" class="opt"
+                                                                  th:text="${blogType.typeName}">
+                                                            </span>
+                                                        </a>
+                                                    </th:block>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <!--博客详情-->
+                        <div class="w12201" style="background-color: rgba(228,228,228,0.22)">
+                            <ul>
+                                <li style="margin-bottom: 10px">
+                                    <div class="layui-card">
+                                        <div class="layui-card-header" style="text-align: center">
+                                            <h2><strong th:text="${title}"></strong></h2>
+                                            <div style="text-align: center">
+                                <span>
+                                    发表于 <span th:text="${blog.releaseDate}"></span>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    阅读(<span th:text="${blog.reads}"></span>)&nbsp;&nbsp;&nbsp;&nbsp;
+                                    博客类别：<span th:text="${blog.blogType.typeName}"></span>
+                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="layui-card-body" style="margin-top: 50px;">
+                                            <div>
+                                <span th:utext="${blog.content}"><br>
+                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="w1220" style="margin-top: 20px;text-align: left">
+                        <!--<div align="center" th:utext="${pageCode}"></div>-->
+                        <span th:if="${prevAndNext.prevId!=null}">
+                   上一篇： <a th:href="@{'/blog/article/' + ${prevAndNext.prevId}}"><span th:text="${prevAndNext.prevTitle}"></span></a>
+                    </span><br/>
+                        <span th:if="${prevAndNext.prevId==null}">
+                  上一篇：   <span th:text="${prevAndNext.prevTitle}"></span>
+                    </span><br/>
+                        <span th:if="${prevAndNext.nextId==null}">
+                    下一篇：<span th:text="${prevAndNext.nextTitle}"></span>
+                    </span><br/>
+                        <span th:if="${prevAndNext.nextId!=null}">
+                    下一篇：<a th:href="@{'/blog/article/' + ${prevAndNext.nextId}}"><span th:text="${prevAndNext.nextTitle}"></span></a>
+                    </span><br/><br/>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer" th:include="common/foot::#f" style="margin-top: 10%"/>
+
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/ckeditor/ckeditor.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    layui.use(['element','laypage'], function(){
+        var laypage = layui.laypage;
+
+    });
+
+    function selectTypeId(typeId){
+        sessionStorage.typeId=typeId;
+        let url="/blog/list/1?s_typeId="+typeId;
+        window.location.href=url;
+    }
+
+    $(function () {
+        // 初始化代码高亮
+        hljs.initHighlightingOnLoad();
+        // CKEDITOR.inline('editor');
+        let clearSessionStorage=[[${clearSessionStorage}]]
+        if(clearSessionStorage=='yes'){
+            // 第一次请求 清空之前的查询条件
+            sessionStorage.clear();
+            // 恢复样式
+            $("#typeId_0").addClass("on");
+        }else{
+            // 不是第一次操作 设置搜索条件的样式
+            let typeId=sessionStorage.typeId;
+            let type=sessionStorage.type;
+            if(typeId==undefined){
+                $("#typeId_0").addClass("on");
+            }else{
+                $("#typeId_"+typeId).addClass("on");
+            }
+        }
+    });
+
+    function scrollToTop({elem, speed = 5, top = 0, showDistance = 500, callback}) {
+        // 获取返回顶部按钮
+        let backToTopButton = document.getElementById(elem);
+        // 当页面滚动时显示或隐藏返回顶部按钮
+        window.onscroll = function() {
+            // 获取当前滚动的位置
+            let currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            // 判断是否超过设置的显示距离，超过就显示，否则就隐藏
+            if (currentScroll > showDistance) {
+                backToTopButton.style.display = "block";
+            } else {
+                backToTopButton.style.display = "none";
+            }
+        };
+        // 平滑滚动到顶部
+        backToTopButton.addEventListener("click", function() {
+            // 获取当前滚动的位置
+            let currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            // 如果当前不在顶部，则开始滚动动画
+            if (currentScroll > top) {
+                window.requestAnimationFrame(smoothScroll); // 运行动画
+            } else {
+                // 到达指定位置，执行回调函数
+                callback && callback();
+            }
+        });
+        // 滚动函数
+        function smoothScroll() {
+            // 获取当前滚动的位置
+            let currentScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            // 如果当前不在顶部，则开始滚动动画
+            if (currentScroll > top) {
+                window.requestAnimationFrame(smoothScroll);
+                window.scrollTo(0, currentScroll - (currentScroll / speed)); // 控制滚动速度
+            }
+        }
+    }
+
+
+
+
+
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

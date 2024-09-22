@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>054-复制粘贴</title>
+    <script type="text/javascript"></script>
+    <script type="text/javascript" src="/js/copy/aaa.js"></script>
+    <script type="text/javascript" src="/js/jquery.js"></script>
+
+    <pre id="ddd">
+        adsaddasdsadsadsadsadasdsdsa
+    </pre>
+</head>
+
+<body>
+<button>复制</button>
+<script type="text/javascript">
+    const copyBtn = document.querySelector('button')
+    copyBtn.onclick = () => {
+        let content = $("#ddd").html()
+        new Clipboard(content, {
+            success: data => console.log('复制成功，这是复制的内容'),
+            fail: () => console.log('复制失败')
+        })
+    }
+
+</script>
+</body>
+
+</html>

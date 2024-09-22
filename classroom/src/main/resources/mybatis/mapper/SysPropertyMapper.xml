@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.SysPropertyMapper">
+
+    <select id="list" resultType="SysProperty">
+        select * from t_property
+    </select>
+
+    <select id="findById" parameterType="Integer" resultType="SysProperty">
+        select * from t_property where id=#{id}
+    </select>
+
+    <update id="update" parameterType="SysProperty">
+        update t_property
+        <set>
+            <if test="value!=null and value!='' ">
+                value=#{value},
+            </if>
+            <if test="remark!=null and remark!='' ">
+                remark=#{remark},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+</mapper>

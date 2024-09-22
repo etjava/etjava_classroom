@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>修改课程</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <style type="text/css">
+
+        table tr td{
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程名称：</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" placeholder="请输入课程名称"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程类别：</label>
+            <div class="layui-input-inline">
+                <select id="courseTypeId" name="courseType.id" class="layui-input" style="width: 360px" placeholder="请选择课程类别" lay-filter="courseTypeId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">授课老师：</label>
+            <div class="layui-input-inline">
+                <select id="teacherId" name="teacher.id" class="layui-input" style="width: 360px" placeholder="请选择授课老师" lay-filter="teacherId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">阅读次数：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="view" name="view"  placeholder="请输入初始阅读次数"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item" id="urldom">
+            <label class="layui-form-label">学习地址：</label>
+            <div class="layui-input-block">
+                <input type="text" id="url" name="url" placeholder="请输入在线学习地址(b站)"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程介绍：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="introduction" name="introduction" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程目录：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="catalog" name="catalog" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item" id="downloaddom">
+            <label class="layui-form-label">高清视频和源码下载：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="download" name="download" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <input type="hidden" id="type" name="type">
+                <button class="layui-btn" onclick="submitData();return false;">提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    courseTypeId=-1;
+    teacherId=-1;
+
+    layui.use(['element','form'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+
+        Promise.all([// 设置页面加载顺序 先加载类别和讲师 然后在加载课程内容
+            $.post("/admin/courseType/list",{},function(result){
+                if(result.code==0){
+                    $("#courseTypeId").prepend("<option value='-1'>请选择课程类别</option>");//添加第一个option值
+                    for (var i = 0; i < result.data.length; i++) {
+                        $("#courseTypeId").append("<option value='" + result.data[i].id + "'>" + result.data[i].name + "</option>");
+                    }
+                    layui.form.render("select");
+                }else{
+                    layer.alert("服务器加载有问题，请联系管理员！");
+                }
+            },"json"),
+
+            $.post("/admin/teacher/list",{},function(result){
+                if(result.code==0){
+                    $("#teacherId").prepend("<option value='-1'>请选择课程类别</option>");//添加第一个option值
+                    for (var i = 0; i < result.data.length; i++) {
+                        $("#teacherId").append("<option value='" + result.data[i].id + "'>" + result.data[i].nickName + "</option>");
+                    }
+                    layui.form.render("select");
+                }else{
+                    layer.alert("服务器加载有问题，请联系管理员！");
+                }
+            },"json")
+        ]).then(function (results) {
+            let[arr,json]=results;
+
+            console.log(arr,json);
+            var id=getQueryVariable("id");
+
+            if(id){
+                $.post("/admin/course/findById",{id:id},function(result){
+                    if(result.success){
+                        var course=result.course;
+
+                        /*设置下拉框的值 必须先上边加载进来后才能设置*/
+                        $("#courseTypeId").find("option[value="+course.courseType.id+"]").prop("selected",true);
+                        $("#teacherId").find("option[value="+course.teacher.id+"]").prop("selected",true);
+
+                        courseTypeId=course.courseType.id;
+                        teacherId=course.teacher.id;
+
+                        layui.form.render("select");
+
+
+                    }else{
+                        layer.alert("服务器加载有问题，请联系管理员！");
+                    }
+                },"json");
+            }
+        })
+
+
+        form.on('select(courseTypeId)', function(data){
+            console.log(data.value)
+            courseTypeId=data.value;
+        });
+
+        form.on('select(teacherId)', function(data){
+            console.log(data.value)
+            teacherId=data.value;
+        });
+
+    });
+
+    function submitData(){
+        var id=getQueryVariable("id");
+        var name=$("#name").val().trim();
+        var type=$("#type").val().trim();
+
+        var view=$("#view").val().trim();
+        var introduction=CKEDITOR.instances.introduction.getData();
+        var catalog=CKEDITOR.instances.catalog.getData();
+
+        if(type=='free'){
+            var url=$("#url").val().trim();
+            var download=CKEDITOR.instances.download.getData();
+            if(url=="") {
+                layer.alert("请输入在线学习地址！");
+                return false;
+            }
+            if(download=="") {
+                layer.alert("请输入高清视频和源码下载！");
+                return false;
+            }
+        }
+
+        if(name=="") {
+            layer.alert("请输入课程名称！");
+            return false;
+        }
+        if(courseTypeId==-1){
+            layer.alert("请选择课程类别！");
+            return false;
+        }
+        if(teacherId==-1){
+            layer.alert("请选择授课老师！");
+            return false;
+        }
+        if(view=="") {
+            layer.alert("请输入阅读次数！");
+            return false;
+        }
+        if (!(/(^[0-9]\d*$)/.test(view))) {
+            layer.alert("阅读次数必须是0或者正整数！");
+            return false;
+        }
+
+        if(introduction=="") {
+            layer.alert("请输入课程介绍！");
+            return false;
+        }
+        if(catalog=="") {
+            layer.alert("请输入课程目录！");
+            return false;
+        }
+
+        /*修改免费课程*/
+        if(type=='free'){
+            $.post("/admin/course/save",{id:id,name:name,"courseType.id":courseTypeId,"teacher.id":teacherId,view:view,url:url,introduction:introduction,catalog:catalog,download:download},function(result){
+                if(result.success){
+                    layer.alert('修改成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    layer.alert(result.errorInfo);
+                }
+            },"json");
+        }else{
+            /*修改收费课程*/
+            $.post("/admin/course/save",{id:id,name:name,"courseType.id":courseTypeId,"teacher.id":teacherId,view:view,introduction:introduction,catalog:catalog},function(result){
+                if(result.success){
+                    layer.alert('修改成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    layer.alert(result.errorInfo);
+                }
+            },"json");
+        }
+
+    }
+
+
+
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+
+    $(function(){
+        var id=getQueryVariable("id");
+        $.post("/admin/course/findById",{id:id},function(result){
+            if(result.success){
+                var course=result.course;
+                $("#name").val(course.name);
+                CKEDITOR.instances.introduction.setData(course.introduction);
+                CKEDITOR.instances.catalog.setData(course.catalog);
+                $("#view").val(course.view);
+                $("#type").val(course.type);
+
+                if(course.type=='vip'){
+                    $("#urldom").remove();
+                    $("#downloaddom").remove();
+                }else{
+                    $("#url").val(course.url);
+                    CKEDITOR.instances.download.setData(course.download);
+                }
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+
+
+    });
+
+
+
+</script>
+</body>
+</html>

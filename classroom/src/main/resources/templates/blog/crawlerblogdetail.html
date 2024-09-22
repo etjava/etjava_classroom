@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<meta charset="UTF-8"/>
+<link rel="icon" href="/images/favicon.ico">
+<meta name="keywords" th:content="${title}">
+<meta name="description" th:content="${title}">
+<link href="/images/favicon.ico" rel="SHORTCUT ICON">
+<title th:text="${application.propertyMap['k19']}+'|'+${application.propertyMap['k1']}"></title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/share.min.css">
+
+<link rel="stylesheet" href="/ckeditor/highlight11.6/default.min.css">
+<script src="/ckeditor/highlight11.6/highlight.min.js"></script>
+
+<!-- code高亮模块CSS -->
+<link rel="stylesheet" type="text/css"
+      href="/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css" />
+<!-- code高亮模块JS -->
+<script type="text/javascript"
+        src="/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js"></script>
+
+<style>
+    /*控制图片大小*/
+    .courseList_body .w1220 .layui-card .layui-card-body img{
+        width: 50%;
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div class="header" th:include="common/menu::#m" />
+
+<div class="layui-container" id="contentbody">
+    <div class="layui-collapse">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="courseList_body">
+                    <div class="courseList_body">
+                        <div class="w1220 searchContent">
+                            <ul>
+                                <li class="li_3">
+                                    <b>搜索：</b>
+                                    <form action="/ext/list/1" method="post">
+                                        <input type="text"  th:value="${s_blogname}" name="s_blogname" placeholder="请输入您要搜索的文章 " autocomplete="off" class="layui-input s_input" >
+                                        <input type="submit" class="layui-btn layui-btn-radius layui-btn-sm" value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;搜索&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ">
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                        <div >
+                            <div class="w1221 " style="background-color: rgba(228,228,228,0.22)">
+                                <ul>
+                                    <li style="margin-bottom: 10px">
+                                        <div class="layui-card">
+                                            <div class="layui-card-header" style="text-align: center">
+                                                <h2><strong th:text="${title}"></strong></h2>
+                                                <div style="text-align: center">
+                                <span>
+                                    发表于 <span th:text="${blog.releaseDate}"></span>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    阅读(<span th:text="${blog.reads}"></span>)&nbsp;&nbsp;&nbsp;&nbsp;
+                                    博客类别：<span th:text="${blog.blogType.typeName}"></span>
+                                </span>
+                                                    <span style="margin-bottom: 10px;">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;转自：<a th:href="@{${blog.originalUrl}}" target="_blank"><span th:text="${blog.originalUrl}"></span></a><br/>
+                                    <font color="red"><strong>如有侵权 请联系我们删除&nbsp;&nbsp;(页面底部联系我们)&nbsp;&nbsp;</strong></font>
+                                </span>
+                                                </div>
+                                            </div>
+                                            <div class="layui-card-body" style="margin-top: 50px">
+                                                <div>
+                                <span th:utext="${blog.content}"><br>
+                                </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="w1220" style="margin-top: 20px;text-align: left">
+                                <!--<div align="center" th:utext="${pageCode}"></div>-->
+                                <span th:if="${prevAndNext.prevId!=null}">
+                   上一篇： <a th:href="@{'/ext/article/' + ${prevAndNext.prevId}}"><span th:text="${prevAndNext.prevTitle}"></span></a>
+                    </span><br/>
+                                <span th:if="${prevAndNext.prevId==null}">
+                  上一篇：   <span th:text="${prevAndNext.prevTitle}"></span>
+                    </span><br/>
+                                <span th:if="${prevAndNext.nextId==null}">
+                    下一篇：<span th:text="${prevAndNext.nextTitle}"></span>
+                    </span><br/>
+                                <span th:if="${prevAndNext.nextId!=null}">
+                    下一篇：<a th:href="@{'/ext/article/' + ${prevAndNext.nextId}}"><span th:text="${prevAndNext.nextTitle}"></span></a>
+                    </span><br/>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="footer" th:include="common/foot::#f" style="margin-top: 10%"/>
+
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/ckeditor/ckeditor.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    layui.use(['element','laypage'], function(){
+        var laypage = layui.laypage;
+
+    });
+
+    function selectTypeId(typeId){
+        sessionStorage.typeId=typeId;
+        let url="/blog/list/1?s_typeId="+typeId;
+        window.location.href=url;
+    }
+
+    $(function () {
+        // 初始化代码高亮
+        hljs.initHighlightingOnLoad();
+        // CKEDITOR.inline('editor');
+        let clearSessionStorage=[[${clearSessionStorage}]]
+        if(clearSessionStorage=='yes'){
+            // 第一次请求 清空之前的查询条件
+            sessionStorage.clear();
+            // 恢复样式
+            $("#typeId_0").addClass("on");
+        }else{
+            // 不是第一次操作 设置搜索条件的样式
+            let typeId=sessionStorage.typeId;
+            let type=sessionStorage.type;
+            if(typeId==undefined){
+                $("#typeId_0").addClass("on");
+            }else{
+                $("#typeId_"+typeId).addClass("on");
+            }
+        }
+    });
+
+    function showMore(){
+        window.location.href="/blogType/more";
+    }
+
+    function contactUs(){
+        alert("666")
+        layer.alert('内容', {
+            icon: 1,
+            skin: 'layer-ext-demo' //见：扩展说明
+        })
+    }
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

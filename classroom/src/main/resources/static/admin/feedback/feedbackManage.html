@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>课程反馈</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        .layui-table-body .layui-table-cell{
+            height:50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>课程反馈</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div style="padding: 20px">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <label class="layui-form-label">课程名称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="s_name"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div>
+            <table width="100%" id="feedbackListTable" lay-filter="test"></table>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+
+        table.render({
+            elem: '#feedbackListTable'
+            ,url:'/admin/feedback/list'
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', width:60,title: '编号'}
+                ,{field:'userName', width:200,title: '用户名'}
+                ,{field:'name', title: '课程名称',templet:formatCourseName}
+                ,{field:'content2',width:200, title: '反馈内容',templet:formatContent}
+                ,{field:'type', width:100,title: '课程类型',templet:formatType}
+                ,{field:'view', width:100,title: '浏览量',templet:formatView}
+                ,{field:'courseType', width:150,title: '课程类别',templet:formatCourseType}
+                ,{field:'teacher', width:100,title: '授课老师',templet:formatTeacher}
+                ,{field:'state', width:100,title: '审核状态',templet:formatState}
+                ,{field:'releaseDate', width:100,title: '发布时间'}
+                ,{field:'action', width:300, title: '操作',align:'center',templet:formatAction}
+            ]]
+            ,page: true
+        });
+
+        //监听行双击事件
+        table.on('rowDouble(test)', function(obj){
+            var id=obj.data.id;
+            // 打开弹出窗口
+            layer.open({
+                type: 2,
+                title: '评论审核',
+                area: ['1000px', '730px'],
+                content: '/admin/feedback/feedbackExamine.html?id='+id //iframe的url
+            });
+            /*$.post("/admin/recommend/updateHktj",{"id":id,"hktj":true,"sort1":1},function(result){
+                if(result.success){
+                    layer.alert('添加成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    $("#errorInfo").text(result.errorInfo);
+                }
+            },"json");*/
+        });
+
+    });
+
+
+
+
+    function search(){
+        var s_name=$("#s_name").val();
+        table.reload("feedbackListTable",{
+            page:{
+                curr:1
+            }
+            ,where:{
+                name:s_name
+            }
+        })
+    }
+
+    function deleteOne(id){
+        layer.confirm('您确定要删除这条记录吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮 - 有几个按钮就要写几个function 按顺序对应
+        }, function(){ // 确定按钮
+            layer.closeAll('dialog');
+            $.post("/admin/feedback/examine",{id:id,state:'3'},function(result){ // 3表示已删除
+                if(result.success){
+                    layer.msg("删除成功！");
+                    table.reload("feedbackListTable",{});
+                }else{
+                    layer.msg("删除失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){ // 取消按钮
+            // 点击取消时的操作
+        });
+    }
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-normal ' onclick='feedbackLook("+d.id+")'><i class='layui-icon layui-icon-fonts-code'></i>查看&nbsp;/&nbsp;回复</button>" +
+            "<button class='layui-btn layui-btn-warm layui-btn-danger' onclick='deleteOne("+d.id+")'><i class='layui-icon layui-icon-delete' ></i>删除反馈</button>";
+    }
+
+    /*
+    let contentStr = d.content.replace(/<[^>]+>/g, "");// 去除html标签;
+    contentStr = contentStr.replace(/[\'\"\\\/\b\f\n\r\t]/g, '').replace(/[\@\#\$\%\^\&\*\(\)\{\}\:\"\L\<\>\?\[\]]/);// 去除转义字符
+    console.log(contentStr)
+    contentStr = contentStr.slice(0,20);// 去掉标签格式并显示20个字
+    console.log(contentStr)
+    return contentStr;
+    * */
+    function formatContent(d){
+        let contentStr = d.content.replaceAll(/<[^>]+>/g, "")
+            .replaceAll(/[\'\"\\\/\b\f\n\r\t]/g, '');
+        // contentStr.replaceAll(/[\@\#\$\%\^\&\*\(\)\{\}\:\"\L\<\>\?\[\]]/,"");
+        // console.log(contentStr);
+        return contentStr.slice(0,50);
+    }
+
+    function formatState(d){
+        /*
+        * 0未审核 1审核通过 2审核不通过
+        * */
+        if(d.state==0){
+            return "未审核";
+        }else if(d.state==1){
+            return "审核通过";
+        }else if(d.state==2){
+            return "审核未通过";
+        }else if(d.state==3){
+            return "已删除";
+        }
+    }
+
+    function formatView(d){
+        return d.course.view;
+    }
+    function formatCourseType(d){
+        return d.course.courseType.name;
+    }
+
+    function formatTeacher(d){
+        return d.course.teacher.nickName;
+    }
+
+    function formatType(d) {
+        if(d.type=='free'){
+            return "免费课程";
+        }else{
+            return "<font color='red'>VIP课程</font>";
+        }
+    }
+
+    function formatCourseName(d) {
+        return "<a target='_blank' href='/course/"+d.course.id+"'>"+d.course.name+"</a>";
+    }
+
+    /*查看课程反馈*/
+    function feedbackLook(id){
+        layer.open({
+            type: 2,
+            title: '查看 / 回复',
+            area: ['1000px', '630px'],
+            content: '/admin/feedback/feedbackReply.html?id='+id //iframe的url
+        });
+    }
+</script>
+</body>
+</html>

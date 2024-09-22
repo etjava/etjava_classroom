@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.LinkMapper">
+
+    <select id="list" parameterType="Map" resultType="Link">
+        select * from t_link order by sort
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultType="Link">
+        select * from t_link where id=#{id}
+    </select>
+    
+    <insert id="addLink" parameterType="Link">
+        insert into t_link values(null,#{name},#{url},#{sort},#{remark})
+    </insert>
+    
+    <update id="updateLink" parameterType="Link">
+        update t_link
+        <set>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+            <if test="url!=null">
+                url=#{url},
+            </if>
+            <if test="sort!=null">
+                sort=#{sort},
+            </if>
+            <if test="remark!=null">
+                remark=#{remark},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    
+    <delete id="deleteLink" parameterType="Integer">
+        delete from t_link where id=#{id}
+    </delete>
+</mapper>

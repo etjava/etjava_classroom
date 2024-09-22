@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.MenuMapper">
+
+    <select id="list" parameterType="Integer" resultType="Menu">
+        select * from t_menu
+        <where>
+            <if test="isShow!=null">
+                and isShow=1
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultType="Menu">
+        select * from t_menu where id=#{id}
+    </select>
+    
+    <insert id="addMenu" parameterType="Menu">
+        insert into t_menu values(null,#{name},#{url},#{color},#{strong},#{sort},0)
+    </insert>
+
+    <update id="updateMenu" parameterType="Menu">
+        update t_menu
+        <set>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+            <if test="url!=null">
+                url=#{url},
+            </if>
+            <if test="color!=null">
+                color=#{color},
+            </if>
+            <if test="strong!=null">
+                strong=#{strong},
+            </if>
+            <if test="sort!=null">
+                sort=#{sort},
+            </if>
+            <if test="isShow!=null">
+                isShow=#{isShow},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+    
+    <delete id="deleteMenu" parameterType="Integer">
+        delete from t_menu where id=#{id}
+    </delete>
+</mapper>

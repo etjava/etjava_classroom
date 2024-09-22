@@ -1,0 +1,153 @@
+
+<!DOCTYPE html>
+<link>
+<meta charset="UTF-8">
+<title>讲师管理</title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<style>
+    .layui-table-body .layui-table-cell{
+        height:100px;
+        line-height: 100px;
+    }
+</style>
+</head>
+<body>
+
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>讲师管理</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div style="padding: 20px">
+            <div class="layui-form">
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">讲师昵称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="s_nickName"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div>
+                <button class="layui-btn layuiadmin-btn-list" data-type="batchdel" onclick="addTeacher()">添加</button>
+            </div>
+        </div>
+        <div>
+            <table width="100%" id="teacherListTable" ></table>
+        </div>
+    </div>
+
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级讲师等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+
+        table.render({
+            elem: '#teacherListTable'
+            ,url:'/admin/teacher/listPage'
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', width:100,title: '编号'}
+                ,{field:'imageName', width:200,title: '头像图片',templet:formatImageName}
+                ,{field:'nickName', width:200,title: '讲师名称'}
+                ,{field:'remark',title: '讲师备注'}
+                ,{field:'action', width:250, title: '操作',align:'center',templet:formatAction}
+            ]]
+            ,page: true
+        });
+
+    });
+
+
+    function search(){
+        var s_nickName=$("#s_nickName").val();
+        table.reload("teacherListTable",{
+            page:{
+                curr:1
+            }
+            ,where:{
+                name:s_nickName
+            }
+        })
+    }
+
+    function deleteOne(id){
+        layer.confirm('您确定要删除这条记录吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮
+        }, function(){
+            layer.closeAll('dialog');
+            $.post("/admin/teacher/delete",{"id":id},function(result){
+                if(result.success){
+                    layer.msg("删除成功！");
+                    table.reload("teacherListTable",{});
+                }else{
+                    layer.msg("删除失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){
+
+        });
+    }
+
+    function addTeacher(){
+        layer.open({
+            type: 2,
+            title: '添加讲师',
+            area: ['550px', '350px'],
+            content: '/admin/teacher/saveTeacher.html' //iframe的url
+        });
+    }
+
+    function modifyTeacher(id){
+        layer.open({
+            type: 2,
+            title: '修改讲师',
+            area: ['550px', '350px'],
+            content: '/admin/teacher/saveTeacher.html?id='+id //iframe的url
+        });
+    }
+
+    function modifyTeacherImage(id){
+        layer.open({
+            type: 2,
+            title: '修改讲师图片',
+            area: ['500px', '500px'],
+            content: '/admin/teacher/saveTeacherImage.html?id='+id //iframe的url
+        });
+    }
+
+
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifyTeacherImage("+d.id+")'><i class='layui-icon layui-icon-edit'></i>修改图片</button><button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifyTeacher("+d.id+")'><i class='layui-icon layui-icon-edit'></i>编辑</button><button class='layui-btn layui-btn-warm layui-btn-xs' onclick='deleteOne("+d.id+")'><i class='layui-icon layui-icon-delete' ></i>删除</button>";
+    }
+
+    function formatImageName(d) {
+        return "<img  src='/teacherImages/"+d.imageName+"'/>";
+    }
+
+
+
+</script>
+</body>
+</html>

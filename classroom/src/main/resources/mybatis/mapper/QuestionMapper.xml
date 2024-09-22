@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.QuestionMapper">
+
+    <resultMap id="QuestionResult" type="Question">
+        <association property="paper" column="paperId" select="com.etjava.mapper.PaperMapper.findById"></association>
+    </resultMap>
+
+    <insert id="add" parameterType="Question" >
+        insert into t_question values(null,#{subject},#{type},now(),#{optionA},#{optionB},#{optionC},#{optionD},#{correctAnswer},#{paper.id})
+    </insert>
+
+    <update id="modify" parameterType="Question">
+        update t_question
+        <set>
+            <if test="subject!=null">
+                subject=#{subject},
+            </if>
+            <if test="type!=null">
+                type=#{type},
+            </if>
+            <if test="optionA!=null">
+                optionA=#{optionA},
+            </if>
+            <if test="optionB!=null">
+                optionB=#{optionB},
+            </if>
+            <if test="optionC!=null">
+                optionC=#{optionC},
+            </if>
+            <if test="optionD!=null">
+                optionD=#{optionD},
+            </if>
+            <if test="correctAnswer!=null">
+                correctAnswer=#{correctAnswer},
+            </if>
+            <if test="paper!=null">
+                paperId=#{paper.id},
+            </if>
+        </set>
+            where id=#{id}
+    </update>
+    
+    <delete id="remove" parameterType="Integer">
+        delete from t_question where id=#{id}
+    </delete>
+    
+    <select id="findByPaperId" parameterType="Integer" resultType="Question">
+        select * from t_question where paperId=#{paperId}
+    </select>
+
+    
+    <select id="list" parameterType="Map" resultMap="QuestionResult">
+        select * from t_question
+        <where>
+            <if test="subject!=null">
+                and subject like concat('%',#{subject},'%')
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Integer">
+        select count(1) from t_question
+        <where>
+            <if test="subject!=null">
+                and subject like concat('%',#{subject},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultMap="QuestionResult">
+        select * from t_question where id=#{id}
+    </select>
+
+
+    <select id="singleQuestion" parameterType="Map" resultMap="QuestionResult">
+        SELECT * FROM t_question WHERE TYPE=1 AND paperId=#{paperId} ORDER BY RAND() LIMIT #{size}
+    </select>
+
+    <select id="moreQuestion" parameterType="Map" resultMap="QuestionResult">
+        SELECT * FROM t_question WHERE TYPE=2 AND paperId=#{paperId} ORDER BY RAND() LIMIT #{size}
+    </select>
+
+</mapper>

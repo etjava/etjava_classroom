@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content="java在线培训机构，java学习，java视频教程">
+    <meta name="description" content="ETJava课堂是高品质的Java视频课程平台。为励志成为Java全栈工程师的程序员们，提供优质的后端技术、前端技术、数据库、服务器视频教程。">
+    <link rel="Shortcut Icon" type="image/x-icon" href="/images/favicon.ico">
+    <title th:text="${application.propertyMap['k1']}+'|'+${application.propertyMap['k2']}"></title>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <style>
+        .course .course_title{
+            letter-spacing: .6px;
+            line-height: 36px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #4D555D;
+        }
+
+        .course .data_info{
+            padding-top: 15px;
+            float: right;
+        }
+
+        .course .data_info .examTitle{
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            padding-top: 30px;
+        }
+
+        .course .data_info .examScoreInfo{
+            padding:10px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .layui-code {
+            font-size: 14px; /* 调整为你想要的字体大小 */
+        }
+
+        .layui-code .layui-code-line span {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            color: #999; /* 或者你想要的颜色 */
+            font-size: 12px; /* 或者你想要的大小 */
+        }
+    </style>
+</head>
+<body>
+<!--引入头部-->
+<div class="header_top" th:include="common/head::#h" />
+
+<!--导航栏-->
+<div class="header" th:include="common/menu::#m" />
+
+<!--课程内容主体-->
+<div class="course">
+<ul>
+    <h3 class="course_title"><img src="images/item.png"> 轻<span></span>松<span></span>一<span></span>刻</h3>
+    <div class="course_item">
+        <a target="_blank" href="/games/pvz">
+            <b class="img">
+                <img class="lazy" src="/images/pvz/pvz.png" style="display: inline;">
+            </b>
+            <div class="content">
+                <h5 th:title="植物大战僵尸" th:text="植物大战僵尸"></h5>
+            </div>
+        </a>
+    </div>
+</ul>
+</div>
+
+<!--页面底部-->
+<div class="footer" th:include="common/foot::#f" style="margin-top: 20%;"/>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script>
+    var timerId;
+    layui.use(['carousel','element','form','table','layer'], function(){
+        var layer = layui.layer;
+        var carousel = layui.carousel;
+        var form=layui.form;
+    });
+
+    function singin(){
+        layer.open({
+            type: 2,
+            title: '系统登录',
+            area: ['500px', '500px'],
+            content: '/forground/common/login.html' //iframe的url
+        });
+    }
+    function register(){
+        layer.open({
+            type: 2,
+            title: '用户注册',
+            area: ['500px', '500px'],
+            content: '/forground/common/register.html' //iframe的url
+        });
+    }
+    /**
+     * 打开用户个人中心页面
+     */
+    function userInfo(){
+        let uId=$("#uId").val();
+        window.location.href="/userInfo?userId="+uId;
+    }
+    // 修改密码
+    function usermodifyPwd(){
+        let uId=$("#uId").val();
+        let userName=$("#curUser").val();
+        layer.open({
+            type: 2,
+            title: '修改密码',
+            area: ['500px', '430px'],
+            content: '/forground/user/modifyUser.html?id='+uId //iframe的url
+        });
+    }
+</script>
+</body>
+</html>
