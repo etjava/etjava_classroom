@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.FootMenuMapper">
+    
+    <select id="findById" parameterType="Integer" resultType="FootMenu">
+        select * from t_footmenu where id=#{id}
+    </select>
+    
+   <insert id="addMenu" parameterType="FootMenu">
+       insert  into t_footmenu values(null,#{name},#{url},#{sort})
+   </insert>
+    
+    <update id="updateMenu" parameterType="FootMenu">
+        update t_footmenu
+        <set>
+            <if test="name!=null">
+                name=#{name},
+            </if>
+            <if test="url!=null">
+                url=#{url},
+            </if>
+            <if test="sort!=null">
+                sort=#{sort},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteMenu" parameterType="Integer">
+        delete from t_footmenu where id=#{id}
+    </delete>
+
+</mapper>

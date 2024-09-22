@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/images/favicon.ico">
+    <title th:text="${application.propertyMap['k1']}+' | 后台系统管理页面'"></title>
+    <link href="/images/favicon.ico" rel="SHORTCUT ICON">
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+</head>
+<body class="layui-layout-body">
+<!--
+    调整为tab页打开每个功能 但无法正常打开弹出窗口
+-->
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <a href="/admin" style="color: #ffffff"><div class="admin-logo"></div></a>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="/systemImages/pere-noel.png" class="layui-nav-img"><span th:text="${session.SPRING_SECURITY_CONTEXT.authentication.principal.username}" style="color: black"></span></img>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/logout">安全退出</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <div class="layui-side layui-bg-black" id="container">
+        <div class="layui-side-scroll menu_layui" >
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <!--
+                <ul class="layui-nav layui-nav-tree"  lay-shrink="all"> 展开所有
+                    menu_layui自定义展开第一层
+                菜单嵌套
+             -->
+            <ul class="layui-nav layui-nav-tree menu_layui"  lay-filter="test">
+                <li th:each="parentMenu:${application.adminMenuList}" class="layui-nav-item">
+                    <a href="javascript:;" th:text="${parentMenu.key}"></a>
+                    <dl class="layui-nav-child" th:each="menu,menuState:${parentMenu.value}">
+                        <dd><a class="site-active" th:text="${menu.tabName}" th:attr="tab-icon=${menu.tabIcon},tab-name=${menu.tabName},tab-url=${menu.tabUrl},tab-layid=${menu.id}"  href="javascript:;"></a></dd>
+                    </dl>
+                </li>
+            </ul>
+            <span id="traineau">
+                <img src="../../images/traineau.jpg"/>
+            </span>
+        </div>
+    </div>
+    <div id="defaultPage" style="height: 600px;width: 100%;"></div>
+    <div class="layui-tab " lay-filter="demo" lay-allowclose="true" style="margin-left: 200px;">
+        <ul class="layui-tab-title">
+        </ul>
+        <ul class="rightmenu">
+            <li data-type="closeOther">关闭其他</li>
+            <li data-type="closeall">关闭所有</li>
+        </ul>
+        <div class="layui-tab-content"></div>
+    </div>
+
+
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="border: 0px" class="layui-tab layui-tab-brief layui-tab-card" lay-allowClose="true" lay-filter="tabList">
+            <div class="layui-tab-title"
+                 style="position: fixed;top: 60px;width: 100vw;height: 2.8rem;margin-left: 201px">
+            </div>
+
+            <div class="layui-tab-content" >
+
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-footer">
+
+        <!-- 底部固定区域 -->
+        Copyright © 2012-2020  广州ETJAVA网络科技有限公司 版权所有 Powered by ETJava 粤ICP备440100001
+    </div>
+</div>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+
+    layui.use(['element','laypage','form','jquery'], function(){
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        var $ = layui.jquery; // 使用jquery
+        var laypage = layui.laypage;
+
+        //////////////点击打开或关闭tab开始/////////////////
+        var deleteIndex;//全局变量
+        element.on('tab(tabList)', function(data){
+            deleteIndex=$(this).attr("lay-id");
+        });
+        //触发事件
+        var active = {
+            tabAdd: function (iconName,name, url, layid) {
+                $("#defaultPage").html("");// 置空默认页面
+                element.tabAdd('tabList', {
+                    title: '<i class="layui-icon" style="font-size: 19px; color: #1E9FFF;">'+iconName+'</i> '+name //'选项卡的标题'
+                    , content: '<iframe id="iframeMain" style="width: 100%" ; height="800px" ; scrolling="no" frameborder="no" src="/admin/' + url + '.html"></iframe>'//'选项卡的内容' //支持传入html
+                    , id: layid//'选项卡标题的lay-id属性值'
+                });
+                CustomRightClick(layid);   //给tab绑定右击事件
+                FrameWH();
+            },
+            tabChange: function (layid) {
+                element.tabChange('tabList', layid);
+            },
+            tabDelete: function (layid) {
+                element.tabDelete('tabList', layid);
+            },
+            tabDeleteAll: function(ids) {
+                $.each(ids,
+                    function(i, item) {
+                        element.tabDelete("tabList", item);
+                    });
+            }
+        }
+
+        //当点击有siteactive属性的标签时，即左侧菜单栏中内容 ，触发点击事件
+        $('.site-active').on("click", function () {
+            var dataid = $(this);
+            var name = dataid.attr("tab-name");
+            var iconName = dataid.attr("tab-icon");
+            var url = dataid.attr("tab-url");
+            var tab_layid = dataid.attr("tab-layid");
+
+
+            //1、 判断tab-layid=layid的tab页是否打开
+            if ($(".layui-tab-title li[lay-id]").length <= 0) { //1.1 初始状态：1个Tab页也没有打开
+                active.tabAdd(iconName,name, url, tab_layid); //打开tab页
+                active.tabChange(tab_layid)//转到该tab页
+            } else { //1.2   判断该Tab页是否已打开
+                var isData = false; //初始化一个标志，为false说明未打开该tab项 为true则说明已有
+                $.each($(".layui-tab-title li[lay-id]"),
+                    function() {
+
+                        //如果点击左侧菜单栏所传入的id 在右侧tab项中的lay-id属性可以找到，则说明该tab项已经打开
+                        if ($(this).attr("lay-id") == tab_layid) {
+                            isData = true;
+
+                        }
+                    });
+                if (isData == false) {
+                    //标志为false 新增一个tab项
+                    active.tabAdd(iconName,name, url, tab_layid); //1.2.1  该Tab页未打开，则打开该tab页
+                }
+
+                active.tabChange(tab_layid)//1.2.2 转到该tab页
+            }
+
+
+            FrameWH();  //计算ifram层的大小
+
+        });
+
+        function CustomRightClick(id) {
+            //取消右键  rightmenu属性开始是隐藏的 ，当右击的时候显示，左击的时候隐藏
+            $('.layui-tab-title li').on('contextmenu', function() { return false; });
+            $('.layui-tab-title,.layui-tab-title li').click(function () {
+                $('.rightmenu').hide();
+            });
+            //桌面点击右击
+            $('.layui-tab-title li').on('contextmenu', function (e) {
+                var popupmenu = $(".rightmenu");
+                popupmenu.find("li").attr("data-id", id); //在右键菜单中的标签绑定id属性
+
+                //判断右侧菜单的位置
+                l = ($(document).width() - e.clientX) < popupmenu.width() ? (e.clientX - popupmenu.width()) : e.clientX;
+                t = ($(document).height() - e.clientY) < popupmenu.height() ? (e.clientY - popupmenu.height()) : e.clientY;
+                popupmenu.css({ left: l, top: t }).show(); //进行绝对定位
+                //alert("右键菜单")
+                return false;
+            });
+        }
+
+        $(".rightmenu li").click(function() {
+            if ($(this).attr("data-type") == "closeOther") {//关闭其他
+                $.each($(".layui-tab-title li[lay-id]"), function () {
+                    //如果点击左侧菜单栏所传入的id 在右侧tab项中的lay-id属性可以找到，则说明该tab项已经打开
+                    if ($(this).attr("lay-id")!=deleteIndex) {
+                        console.log("即将删除lay-id"+$(this).attr("lay-id"));
+                        active.tabDelete($(this).attr("lay-id"));
+                    }
+                });
+            } else if ($(this).attr("data-type") == "closeall") {//关闭所有
+                var tabtitle = $(".layui-tab-title li");
+                var ids = new Array();
+                $.each(tabtitle, function (i) {
+                    ids[i] = $(this).attr("lay-id");
+                });
+                active.tabDeleteAll(ids);
+            }
+            $('.rightmenu').hide();
+            let page = "<iframe id='pageFrame' frameBorder='0' scrolling='auto' style='width:100%;height:100%'" +
+                "                src='/admin/default.html'></iframe>";
+            $("#defaultPage").html(page);
+        });
+
+        function FrameWH() { //计算ifram层的大小
+            console.log($(window).height())
+            //var h = $(window).height() -  41 - 10 - 60 - 10 - 44 - 10
+            $("iframe").css("height", "1800px");
+        }
+
+        $(window).resize(function() {
+            FrameWH();
+        });
+        //////////////点击打开或关闭tab结束/////////////////
+
+    });
+
+    function openPage(page){
+        $("#pageFrame").attr("src","/admin/"+page);
+    }
+
+    function flushCache(){
+        window.location.href="/admin/user/flushCache";
+        layer.alert('刷新完成！');
+    }
+
+    $(function () {
+        // 调整菜单互斥打开
+        $(".layui-nav li>a").on("click", function (e) {
+            $(this).parent().siblings().removeClass("layui-nav-itemed").removeClass("layui-this");
+            // 点击打开时自动打开tab页
+            // if ($(this).parent().find("dl").length) {
+            //     $(this).parent().find("dl").children().eq(0).children()[0].click();
+            // }
+        });
+
+        let page = "<iframe id='pageFrame' frameBorder='0' scrolling='auto' style='width:100%;height:100%'" +
+            "                src='/admin/default.html'></iframe>";
+        $("#defaultPage").html(page);
+
+
+    })
+
+
+    /*]]>*/
+</script>
+
+<style>
+
+    /*  菜单 */
+    .menu_layui{ background:#fff !important; border-bottom:1px solid #fff; font-weight:bold;}/*font-size:large*/
+    .menu_layui a{color:#333 !important; font-weight:bold;}
+
+    /*当前*/
+    .menu_layui .layui-this a{color: #042197 !important;}
+    /*.menu_layui .layui-this:after{background-color:#041e97 !important;}*/
+    .menu_layui .layui-anim-upbit:after{background-color:#049706FF !important;}
+
+    /* 悬浮 */
+    .menu_layui .layui-nav .layui-nav-bar{background-color:#049706FF !important;}
+    .menu_layui_left ul{background: rgba(255, 255, 25, 0) !important;}
+    .menu_layui_left a{color:#000 !important; font-weight:bold}
+    .menu_layui_left dd a{color:#333 !important; font-weight:normal; text-indent:20px}
+    .menu_layui_left .layui-nav-more{border-style: solid dashed dashed;border-color: #000 transparent transparent;}
+    .menu_layui_left .layui-nav-itemed>a .layui-nav-more{border-color: transparent transparent #000 !important;}
+    .menu_layui_left .layui-nav-item a:hover{background-color: rgba(255, 255, 255, 0.97)
+    }
+    .menu_layui_left .layui-this a{background:#041e97 !important; color:#fff !important;}
+    .layui-nav-tree .layui-this,.layui-nav-tree .layui-this>a,.layui-nav-tree .layui-nav-child dd.layui-this,.layui-nav-tree .layui-nav-child dd.layui-this a{background-color:pink !important;}
+
+    /*圣诞挂件*/
+    #traineau{
+        position: absolute; /*绝对定位*/
+        bottom: 10px;  /*底部距离*/
+        left: 50%;  /*水平居中*/
+        transform: translateX(-20%); /*微调位置*/
+        /*box-shadow: 0px 10px 20px rgba(0,0,0,0.3);*//*阴影*/
+    }
+
+    #traineau img{
+        width: 90.9%;
+    }
+    /*tab页相关样式*/
+    .rightmenu { position: absolute; width: 80px; z-index: 9999; display: none; background-color: #fff; padding: 2px; color: #333; border: 5px solid #eee; border-radius: 2px; cursor: pointer; }
+    .rightmenu li { text-align: center; display: block; height: 25px; line-height: 25px; }
+    /*右键菜单背景色*/
+    .rightmenu li:hover { background-color: #00CB08; color: #fff; }
+</style>
+
+</body>
+</html>

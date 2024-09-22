@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.GraduationDesignMapper">
+
+    <select id="list" parameterType="Map" resultType="GraduationDesign">
+        select * from t_graduation_design
+        <where>
+            <if test="courseName!=null">
+                and courseName like concat('%',#{courseName},'%')
+            </if>
+            <if test="courseType!=null">
+                and courseType like concat('%',#{courseType},'%')
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Integer">
+        select count(1) as total from t_graduation_design
+        <where>
+            <if test="courseName!=null">
+                and courseName like concat('%',#{courseName},'%')
+            </if>
+            <if test="courseType!=null">
+                and courseType like concat('%',#{courseType},'%')
+            </if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="GraduationDesign">
+        update t_graduation_design
+        <set>
+            <if test="courseName!=null">
+                courseName=#{courseName},
+            </if>
+            <if test="courseType!=null">
+                courseType=#{courseType},
+            </if>
+            <if test="courseUrl!=null">
+                courseUrl=#{courseUrl},
+            </if>
+            <if test="isVip!=null">
+                isVip=#{isVip},
+            </if>
+            <if test="state!=null">
+                state=#{state},
+            </if>
+        </set>
+            where id=#{id}
+    </update>
+
+    <insert id="save" parameterType="GraduationDesign">
+        insert into t_graduation_design values(null,#{courseName},#{courseType},#{courseUrl},#{isVip},#{state},0)
+    </insert>
+
+    <update id="updateDownloads" parameterType="Integer">
+        update t_graduation_design set downloads=downloads+1 where id=#{id}
+    </update>
+
+    <select id="findById" parameterType="Integer" resultType="GraduationDesign">
+        select * from t_graduation_design where id=#{id}
+    </select>
+</mapper>

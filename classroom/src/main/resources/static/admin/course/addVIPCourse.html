@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加VIP课程</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        table tr td{
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>添加VIP课程</cite></a>
+			</span>
+</div>
+
+
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程名称：</label>
+            <div class="layui-input-block">
+                <input type="text" id="name" name="name" placeholder="请输入课程名称"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程类别：</label>
+            <div class="layui-input-inline">
+                <select id="courseTypeId" name="courseType.id" class="layui-input" style="width: 360px" placeholder="请选择课程类别" lay-filter="courseTypeId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">授课老师：</label>
+            <div class="layui-input-inline">
+                <select id="teacherId" name="teacher.id" class="layui-input" style="width: 360px" placeholder="请选择授课老师" lay-filter="teacherId">
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">阅读次数：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="view" name="view" value="100" placeholder="请输入初始阅读次数"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程介绍：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="introduction" name="introduction" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课程目录：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="catalog" name="catalog" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" onclick="submitData();return false;">提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    courseTypeId=-1;
+    teacherId=-1;
+
+    layui.use(['element','form'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+        $.post("/admin/courseType/list",{},function(result){
+            if(result.code==0){
+                $("#courseTypeId").prepend("<option value='-1'>请选择课程类别</option>");//添加第一个option值
+                for (var i = 0; i < result.data.length; i++) {
+                    $("#courseTypeId").append("<option value='" + result.data[i].id + "'>" + result.data[i].name + "</option>");
+                }
+                layui.form.render("select");
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+
+        $.post("/admin/teacher/list",{},function(result){
+            if(result.code==0){
+                $("#teacherId").prepend("<option value='-1'>请选择课程类别</option>");//添加第一个option值
+                for (var i = 0; i < result.data.length; i++) {
+                    $("#teacherId").append("<option value='" + result.data[i].id + "'>" + result.data[i].nickName + "</option>");
+                }
+                layui.form.render("select");
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+
+        form.on('select(courseTypeId)', function(data){
+            courseTypeId=data.value;
+        });
+
+        form.on('select(teacherId)', function(data){
+            teacherId=data.value;
+        });
+
+    });
+
+    function submitData(){
+        var name=$("#name").val().trim();
+
+        var view=$("#view").val().trim();
+        var introduction=CKEDITOR.instances.introduction.getData();
+        var catalog=CKEDITOR.instances.catalog.getData();
+        if(name=="") {
+            layer.alert("请输入课程名称！");
+            return false;
+        }
+        if(courseTypeId==-1){
+            layer.alert("请选择课程类别！");
+            return false;
+        }
+        if(teacherId==-1){
+            layer.alert("请选择授课老师！");
+            return false;
+        }
+        if(view=="") {
+            layer.alert("请输入阅读次数！");
+            return false;
+        }
+        if (!(/(^[0-9]\d*$)/.test(view))) {
+            layer.alert("阅读次数必须是0或者正整数！");
+            return false;
+        }
+        if(introduction=="") {
+            layer.alert("请输入课程介绍！");
+            return false;
+        }
+        if(catalog=="") {
+            layer.alert("请输入课程目录！");
+            return false;
+        }
+        $.post("/admin/course/addVip",{name:name,"courseType.id":courseTypeId,"teacher.id":teacherId,view:view,introduction:introduction,catalog:catalog},function(result){
+            if(result.success){
+                layer.alert('添加成功！',function () {
+                    window.parent.openPage('course/courseManage.html');
+                });
+            }else{
+                layer.alert(result.errorInfo);
+            }
+        },"json");
+    }
+
+
+
+</script>
+</body>
+</html>

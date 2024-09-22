@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加或修改试题</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        table tr td{
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">试题类型：</label>
+            <div class="layui-input-inline">
+                <select id="type" name="type" class="layui-input" style="width: 360px" placeholder="请选择试题类型" lay-filter="type">
+                    <option value="-1">==选择所属试卷==</option>
+                    <option value="1">单选题</option>
+                    <option value="2">多选题</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">所属试卷：</label>
+            <div class="layui-input-inline">
+                <select id="paperId" name="paper.id" class="layui-input" style="width: 360px" placeholder="请选择授课老师" lay-filter="paperId">
+                </select>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">试题：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="subject" name="subject" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选项A：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="optionA" name="optionA" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选项B：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="optionB" name="optionB" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选项C：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="optionC" name="optionC" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选项D：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="optionD" name="optionD" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">正确答案：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="correctAnswer" name="correctAnswer"  autocomplete="off" autocomplete="off"  class="layui-input"/>
+                <span>(填写选项A或B或C或D)</span>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" onclick="submitData();return false;">提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    // 保存到临时变量中 最后统一提交
+    type=-1; // 试题类型
+    paperId=-1; // 试卷ID
+
+
+    layui.use(['element','form'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+        $.post("/admin/paper/combolist",{},function(result){
+            if(result.code==0){
+                $("#paperId").prepend("<option value='-1'>请选择课程类别</option>");//添加第一个option值
+                for (var i = 0; i < result.data.length; i++) {
+                    $("#paperId").append("<option value='" + result.data[i].id + "'>" + result.data[i].paperName + "</option>");
+                }
+                layui.form.render("select");
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+
+        form.on('select(type)', function(data){
+            type=data.value;
+        });
+
+        form.on('select(paperId)', function(data){
+            paperId=data.value;
+        });
+    });
+
+    $(function(){
+        var id=getQueryVariable("id");
+        if(id){
+            $.post("/admin/question/findById",{id:id},function(result){
+                if(result.success){
+                    var question=result.question;
+                    $("#type").find("option[value="+type+"]").prop("selected",true);
+                    $("#paperId").find("option[value="+question.paper.id+"]").prop("selected",true);
+                    layui.form.render("select");// 选中下拉框
+                    // 解决页面多次调用 ，就会出现多个editor
+                    var editor;
+                    //加载CKeditor
+                    //判定 subject 是否存在
+                    if(!CKEDITOR.instances['subject']){
+                        editor = CKEDITOR.replace('subject');
+                    }else{
+                        CKEDITOR.instances.subject.destroy();
+                        CKEDITOR.replace('subject');
+                    }
+                    CKEDITOR.instances.subject.setData(question.subject);
+                    if(!CKEDITOR.instances['optionA']){
+                        editor = CKEDITOR.replace('optionA');
+                    }else{
+                        CKEDITOR.instances.subject.destroy();
+                        CKEDITOR.replace('optionA');
+                    }
+                    CKEDITOR.instances.optionA.setData(question.optionA);
+                    if(!CKEDITOR.instances['optionB']){
+                        editor = CKEDITOR.replace('optionB');
+                    }else{
+                        CKEDITOR.instances.subject.destroy();
+                        CKEDITOR.replace('optionB');
+                    }
+                    CKEDITOR.instances.optionB.setData(question.optionB);
+                    if(!CKEDITOR.instances['optionC']){
+                        editor = CKEDITOR.replace('optionC');
+                    }else{
+                        CKEDITOR.instances.optionC.destroy();
+                        CKEDITOR.replace('optionC');
+                    }
+                    CKEDITOR.instances.optionC.setData(question.optionC);
+                    if(!CKEDITOR.instances['optionD']){
+                        editor = CKEDITOR.replace('optionD');
+                    }else{
+                        CKEDITOR.instances.optionD.destroy();
+                        CKEDITOR.replace('optionD');
+                    }
+                    CKEDITOR.instances.optionD.setData(question.optionD);
+                }else{
+                    layer.alert('服务器加载有问题，请联系管理员！');
+                }
+            },"json");
+        }
+    });
+
+    function submitData(){
+        var correctAnswer=$("#correctAnswer").val().trim();
+        var subject=CKEDITOR.instances.subject.getData();
+        var optionA=CKEDITOR.instances.optionA.getData();
+        var optionB=CKEDITOR.instances.optionB.getData();
+        var optionC=CKEDITOR.instances.optionC.getData();
+        var optionD=CKEDITOR.instances.optionD.getData();
+
+        if(subject=="") {
+            layer.alert("请添加试题！");
+            return false;
+        }
+        if(type==-1){
+            layer.alert("请选择试题类型！");
+            return false;
+        }
+        if(paperId==-1){
+            layer.alert("请选择所属试卷！");
+            return false;
+        }
+        if(optionA=="") {
+            layer.alert("请添加试题A选项！");
+            return false;
+        }
+        if(optionB=="") {
+            layer.alert("请添加试题B选项！");
+            return false;
+        }
+        if(optionC=="") {
+            layer.alert("请添加试题C选项！");
+            return false;
+        }
+        if(optionD=="") {
+            layer.alert("请添加试题D选项！");
+            return false;
+        }
+        var id=getQueryVariable("id");
+        if(id){// 修改
+            $.post("/admin/question/save",{id:id,subject:subject,"paper.id":paperId,type:type,optionA:optionA,
+                optionB:optionB,optionC:optionC,optionD:optionD,correctAnswer:correctAnswer},function(result){
+                if(result.success){
+                    layer.alert('修改成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    layer.alert(result.errorInfo);
+                }
+            },"json");
+        }else{// 添加
+            $.post("/admin/question/save",{subject:subject,"paper.id":paperId,type:type,optionA:optionA,
+                optionB:optionB,optionC:optionC,optionD:optionD,correctAnswer:correctAnswer},function(result){
+                if(result.success){
+                    layer.alert('添加成功！',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    layer.alert(result.errorInfo);
+                }
+            },"json");
+        }
+
+    }
+
+
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+</script>
+</body>
+</html>

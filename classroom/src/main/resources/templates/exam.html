@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="keywords" content="java在线培训机构，java学习，java视频教程">
+    <meta name="description" content="ETJava课堂是高品质的Java视频课程平台。为励志成为Java全栈工程师的程序员们，提供优质的后端技术、前端技术、数据库、服务器视频教程。">
+    <link rel="Shortcut Icon" type="image/x-icon" href="/images/favicon.ico">
+    <title th:text="${application.propertyMap['k1']}+'|'+${application.propertyMap['k2']}"></title>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+
+    <style>
+        .course .course_title{
+            letter-spacing: .6px;
+            line-height: 36px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #4D555D;
+        }
+
+        .course .data_info{
+            padding-top: 15px;
+            float: right;
+        }
+
+        .course .data_info .examTitle{
+            font-size: 30px;
+            font-weight: bold;
+            text-align: center;
+            padding-top: 30px;
+        }
+
+        .course .data_info .examScoreInfo{
+            padding:10px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .layui-code {
+            font-size: 14px; /* 调整为你想要的字体大小 */
+        }
+
+        .layui-code .layui-code-line span {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            color: #999; /* 或者你想要的颜色 */
+            font-size: 12px; /* 或者你想要的大小 */
+        }
+    </style>
+</head>
+<body>
+<!--引入头部-->
+<div class="header_top" th:include="common/head::#h" />
+
+<!--导航栏-->
+<div class="header" th:include="common/menu::#m" />
+
+<!--课程内容主体-->
+<div class="course">
+    <ul>
+        <h3 class="course_title">在<span></span>线<span></span>考<span></span>试</h3>
+        <form class="layui-form" id="myForm" action="/exam/add" method="post">
+            <div class="layui-inline">
+                <label class="layui-form-label">选择试卷：</label>
+                <div class="layui-input-inline">
+                    <select id="paperId" name="paperId"  class="layui-input" style="width: 360px" placeholder="请选择试卷" lay-filter="paperId">
+                    </select>
+                </div>
+            </div>
+            <div class="data_info">
+                <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;考试时间：<strong>20分钟</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    计时：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="useTime" style="font-weight: bold;"></font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    剩余时间：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font id="remainTime" style="font-weight: bold;"></font></p>
+                <hr/>
+                <p class="examScoreInfo">(&nbsp;满分120&nbsp;&nbsp;单选题60分&nbsp;&nbsp;多选题60分&nbsp;)</p>
+            </div>
+            <div id="questionItem"></div>
+        </form>
+    </ul>
+</div>
+
+<!--页面底部-->
+<div class="footer" th:include="common/foot::#f" style="margin-top: 20%;"/>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script>
+    var timerId;
+    layui.use(['carousel','element','form','table','layer'], function(){
+        var layer = layui.layer;
+        var carousel = layui.carousel;
+        var form=layui.form;
+
+
+        $.post("/exam/combolist",{},function(result){
+            if(result.code==0){
+                $("#paperId").prepend("<option value='-1'>请选择试卷</option>");//添加第一个option值
+                for (var i = 0; i < result.data.length; i++) {
+                    $("#paperId").append("<option value='" + result.data[i].id + "'>" + result.data[i].paperName + "</option>");
+                }
+                layui.form.render("select");
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+
+        form.on('select(paperId)', function(data){
+            var paperId = data.value;// 获取选中的value
+            var paperName = $("#paperId option:selected").text();// 获取选中的文本
+
+            if(paperId=='-1'){
+                return;
+            }
+
+            //弹出确认框
+            layer.confirm("你确定要选择<span style='color:red;'>《"+paperName+"》</span>试卷吗?",{
+                size:['700px', '500px']
+            }, function(index){
+                //点击确定后关闭弹出窗
+                layer.close(index); //这里index是你弹出的确认框的唯一标识，需要关闭这个确认框
+                // 禁用选择框
+                $("#paperId").prop('disabled',true);
+
+                // 请求后台 获取需要考试的题目
+                $.post("/exam/question",{paperId:paperId},function(result){
+                    if(result.code==0){
+
+                        let singQuestions = result.singQuestion;
+                        let moreQuestions = result.moreQuestion;
+
+                        if(singQuestions=='' || singQuestions==null){
+                            $("#paperId").prop('disabled',false);
+                            // 提示暂无试题
+                            var panel="<div class=\"layui-row layui-col-space15\">\n" +
+                                "                <div class=\"layui-col-md12\">\n" +
+                                "                    <div class=\"layui-panel\">\n" +
+                                "<pre style='color: red;text-align: center;font-size: 32px'>暂无试题</pre>"+
+                                "                </div>\n" +
+                                "            </div>";
+
+
+                            // 显示到div中
+                            $("#questionItem").html(panel);
+                            // 更新下form表单 否则不显示多选框
+                            form.render();
+                        }else{
+                            let singleContent="<ul>";
+                            let count=1;
+                            for (let single of singQuestions) {
+                                singleContent+=
+                                    "    <fieldset class='layui-elem-field'>" +
+                                    "        <div class='layui-field-box'> <span style='font-weight: bold;font-size: 20px;color: #042197'>" +(count++) +
+                                    "            </span><pre class='layui-code'  id='subject' style='margin-top: 20px;'>"+single.subject+"</pre>" +
+                                    "            <input id='correctAnswer' type='hidden' value='"+single.correctAnswer+"'>" +
+                                    "            <input type='checkbox' name='a' lay-skin='primary' title='A'>" +
+                                    "            <pre id='optionA' style='padding-left: 50px;padding-bottom: 10px'>"+single.optionA+"</pre>" +
+                                    "            <input type='checkbox' name='b' lay-skin='primary' title='B'>" +
+                                    "            <pre id='optionB' style='padding-left: 50px;padding-bottom: 10px'>"+single.optionB+"</pre>" +
+                                    "            <input type='checkbox' name='c' lay-skin='primary' title='C'>" +
+                                    "            <pre id='optionC' style='padding-left: 50px;padding-bottom: 10px'>"+single.optionC+"</pre>" +
+                                    "            <input type='checkbox' name='d' lay-skin='primary' title='D'>" +
+                                    "            <pre id='optionD' style='padding-left: 50px;padding-top: 10px'>"+single.optionD+"</pre>" +
+                                    "        </div>" +
+                                    "    </fieldset>";
+                            }
+                            /*singleContent+="<div class='layui-form-item'>" +
+                                "    <div style='float: left'>" +
+                                "      <button class='layui-btn' >提交</button>" +
+                                "    </div>" +
+                                "  </div></ul>"*/
+
+
+                            // 多选
+                            let moreleContent="<ul>";
+                            for (let more of moreQuestions) {
+                                moreleContent+=
+                                    "    <fieldset class='layui-elem-field'>" +
+                                    "        <div class='layui-field-box'><span style='font-weight: bold;font-size: 20px;color: #042197'>" +(count++) +
+                                    "            </span><pre class='layui-code' id='subject' style='margin-top: 20px;'>"+more.subject+"</pre>" +
+                                    "            <input id='correctAnswer' type='hidden' value='"+more.correctAnswer+"'>" +
+                                    "            <input type='checkbox' name='like1[read]' lay-skin='primary' title='A'>" +
+                                    "            <pre id='optionA' style='padding-left: 50px;padding-bottom: 10px'>"+more.optionA+"</pre>" +
+                                    "            <input type='checkbox' name='like1[read]' lay-skin='primary' title='B'>" +
+                                    "            <pre id='optionB' style='padding-left: 50px;padding-bottom: 10px'>"+more.optionB+"</pre>" +
+                                    "            <input type='checkbox' name='like1[read]' lay-skin='primary' title='C'>" +
+                                    "            <pre id='optionC' style='padding-left: 50px;padding-bottom: 10px'>"+more.optionC+"</pre>" +
+                                    "            <input type='checkbox' name='like1[read]' lay-skin='primary' title='D'>" +
+                                    "            <pre id='optionD' style='padding-left: 50px;padding-top: 10px'>"+more.optionD+"</pre>" +
+                                    "        </div>" +
+                                    "    </fieldset>";
+                            }
+
+                            moreleContent+="<div class='layui-form-item'>" +
+                                "    <div style='float: left'>" +
+                                "      <button class='layui-btn' onclick='submitData2()'>提交</button>" +
+                                "    </div>" +
+                                "  </div></ul>"
+
+                            // 显示单选和多选题
+                            var panel="<div class=\"layui-row layui-col-space15\">\n" +
+                                "                <div class=\"layui-col-md12\">\n" +
+                                "                    <div class=\"layui-panel\">\n" +
+                                "                        <div style=\"padding: 30px;\">单选题</div>\n" +
+                                singleContent+
+
+                                "                        <div style=\"padding: 30px;\">多选题</div>\n" +moreleContent+
+                                "                    </div>\n" +
+                                "                </div>\n" +
+                                "            </div>";
+
+
+                            // 显示到div中
+                            $("#questionItem").html(panel);
+                            // 更新下form表单 否则不显示多选框
+                            form.render();
+                            count=1;
+                        }
+
+
+                    }else{
+                        layer.alert("服务器加载有问题，请联系管理员！");
+                    }
+                },"json");
+                //显示倒计时
+                timerId = setInterval(function() {
+                    showCount();
+                }, 1000);
+            }, function(index){
+                //点击取消后关闭弹窗
+                layer.close(index);
+            });
+
+
+        });
+
+    });
+
+    function singin(){
+        layer.open({
+            type: 2,
+            title: '系统登录',
+            area: ['500px', '500px'],
+            content: '/forground/common/login.html' //iframe的url
+        });
+    }
+
+    function register(){
+        layer.open({
+            type: 2,
+            title: '用户注册',
+            area: ['500px', '500px'],
+            content: '/forground/common/register.html' //iframe的url
+        });
+    }
+
+    /**
+     * 打开用户个人中心页面
+     */
+    function userInfo(){
+        let uId=$("#uId").val();
+        window.location.href="/userInfo?userId="+uId;
+    }
+
+    // 修改密码
+    function usermodifyPwd(){
+        let uId=$("#uId").val();
+        let userName=$("#curUser").val();
+        layer.open({
+            type: 2,
+            title: '修改密码',
+            area: ['500px', '430px'],
+            content: '/forground/user/modifyUser.html?id='+uId //iframe的url
+        });
+    }
+
+        // 页面显示倒计时
+        var examTime2=20*60;
+        var examTime=90*60;
+        var useTime=0,remainTime=examTime;
+
+        function showCount(){
+
+            if(remainTime==0){
+                document.getElementById("myForm").submit();
+                // 提交后关闭计时器
+                clearInterval(timerId);
+            }
+
+            useTime+=1;
+            remainTime-=1;
+
+            var hourU=Math.floor(useTime/3600);
+            var minuteU=Math.floor((useTime-hourU*3600)/60);
+            var secondU=Math.floor(useTime-hourU*3600-minuteU*60);
+            document.getElementById("useTime").innerHTML=format(hourU)+":"+format(minuteU)+":"+format(secondU);
+
+            var hourR=Math.floor(remainTime/3600);
+            var minuteR=Math.floor((remainTime-hourR*3600)/60);
+            var secondR=Math.floor(remainTime-hourR*3600-minuteR*60);
+            document.getElementById("remainTime").innerHTML=format(hourR)+":"+format(minuteR)+":"+format(secondR);
+        }
+
+        function format(timeNumber){
+            if(timeNumber<10){
+                return "0"+timeNumber;
+            }else{
+                return timeNumber;
+            }
+        }
+
+
+
+</script>
+
+</body>
+</html>

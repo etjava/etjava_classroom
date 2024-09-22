@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8"/>
+<link rel="icon" href="/images/favicon.ico">
+<meta name="keywords" th:content="${title}">
+<meta name="description" th:content="${title}">
+<link href="/images/favicon.ico" rel="SHORTCUT ICON">
+<title th:text="${title}+' | '+${application.propertyMap['k1']}"></title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/share.min.css">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body onload="ResizeImages(900,1500,'content')">
+
+<div class="header_top" th:include="common/head::#h" />
+
+
+<div class="header" th:include="common/menu::#m" />
+
+<div class="course_body">
+    <div class="w1220 course_nav">
+        <span class="layui-breadcrumb">
+            <a href="/">首页</a>
+            <a href="/course/list">课程</a>
+            <a th:href="'/course/list/1?s_typeId='+${course.courseType.id}" th:text="${course.courseType.name}"></a>
+          <a><cite th:text="${course.name}"></cite></a>
+        </span>
+    </div>
+    <div class="w1220 course_intro">
+        <div class="course_img">
+            <img th:src="'/courseImages/'+${course.imageName}"/>
+        </div>
+        <div class="course_detail">
+            <h1 th:text="${course.name}"></h1>
+            <div class="some">
+                <p>
+                    学习次数：<span th:text="${course.view}"></span>
+                </p>
+                <p>
+                    课程类别：<span th:text="${course.courseType.name}"></span>
+                </p>
+
+                <p th:if="${course.type=='free'}">
+                    课程类型：免费课程
+                </p>
+
+                <p th:if="${course.type=='vip'}">
+                    课程类型：<strong style="color: red">VIP课程</strong>
+                </p>
+
+            </div>
+            <a th:if="${course.type=='free'}"  th:href="${course.url}" class="layui-btn layui-btn-lg" target="_blank">免费在线学习该课程</a>
+            <a th:if="${course.type=='vip'}" href="/toPayVip" style="background: red" class="layui-btn layui-btn-lg" target="_blank">点击开通VIP会员学习本课程</a>
+        </div>
+        <div id="share" class="share"></div>
+        <div class="course_img2">
+            <img src="/systemImages/course_image.png" >
+        </div>
+    </div>
+
+    <div class="w1220 course_content">
+        <!--需要处理图片大小为自适应 通过id处理-->
+        <div class="content_left" id="content">
+            <div class="layui-tab layui-tab-brief" >
+                <ul class="layui-tab-title">
+                    <li class="layui-this"><h3>课程介绍</h3></li>
+                    <li><h3>课程目录</h3></li>
+                    <li><h3>课程答疑</h3></li>
+                    <li><h3>高清视频和源码下载</h3></li>
+                    <li><h3>Q&A</h3></li>
+                    <li><h3>章节测试</h3></li>
+                </ul>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show" th:utext="${course.introduction}"></div>
+                    <div class="layui-tab-item" th:utext="${course.catalog}"></div>
+                    <div class="layui-tab-item" th:utext="${application.propertyMap['k7']}"></div>
+                    <div class="layui-tab-item" th:if="${course.type=='free'}" th:utext="${course.download}"></div>
+                    <div class="layui-tab-item" th:if="${course.type=='vip'}" th:utext="${application.propertyMap['k8']}"></div>
+
+                    <div class="layui-tab-item">
+                        <div class="w1220 course" th:include="common/feedback::#feedback"/>
+                    </div>
+                    <div class="layui-tab-item" th:utext="${application.propertyMap['k16']}"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="content_right">
+            <div class="teacher">
+                <div class="layui-tab" style="margin-bottom: 0px">
+                    <ul class="layui-tab-title">
+                        <li><h3>授课老师</h3></li>
+                    </ul>
+                    <div class="layui-tab-content" style="height: 100px;padding-bottom: 0px">
+                        <div class="layui-tab-item layui-show">
+                            <a href="/article/8" target="_blank"><img th:src="'/teacherImages/'+${course.teacher.imageName}" ></a>
+                            <a href="/article/8" target="_blank"><span th:text="${course.teacher.nickName}"></span>
+                                <p th:text="${course.teacher.remark}"></p></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="recommend">
+                <div class="layui-tab" style="margin-bottom: 0px">
+                    <ul class="layui-tab-title">
+                        <li><h3>课程推荐</h3></li>
+                    </ul>
+                    <div class="layui-tab-content" style="padding-bottom: 0px;padding-right: 0px;">
+                        <div class="layui-tab-item layui-show">
+                            <ul class="rcourse">
+                                <!--课程推荐-->
+                                <li th:each="recomment:${recommentList}">
+                                    <img src="/images/hot.gif">
+                                    <span><a th:href="'/course/'+${recomment.id}" th:text="${recomment.name}" target="_blank"></a></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer" th:include="common/foot::#f" />
+
+
+
+
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    layui.use(['element'], function(){
+
+    });
+
+    $(function () {
+        // 更新浏览次数
+        $.post("/course/updateView",{id:[[${course.id}]]},function (result) {
+        },"json");
+        // 分享组件
+        $('#share').share({sites: ['facebook','twitter', 'qq', 'instagram']});
+    });
+
+    function singin(){
+        layer.open({
+            type: 2,
+            title: '系统登录',
+            area: ['500px', '500px'],
+            content: '/forground/common/login.html' //iframe的url
+        });
+    }
+    /*打开注册弹窗*/
+    function register(){
+        layer.open({
+            type: 2,
+            title: '用户注册',
+            area: ['500px', '500px'],
+            content: '/forground/common/register.html' //iframe的url
+        });
+    }
+
+    function sendQA(){
+        let cId=[[${course.id}]];
+        let userName=$("#curUser").val();
+        let uId = $("#uId").val();
+        if(userName==''){
+           layer.alert("尚未登录,请先登录");
+        }else{
+            // 发布反馈
+            let fcontent=$("#feedbackcontent").val();
+            if(fcontent==''){
+                layer.msg("请填写需要反馈的内容");
+                return;
+            }
+            // 提交反馈
+            $.post("/feedback/send",{uId:uId,courseId:cId,content:fcontent,userName:userName},function(result){
+                if(result.success){
+                    layer.alert('发布成功,待审核通过后显示',function () {
+                        parent.reloadPage();
+                    });
+                }else{
+                    layer.alert(result.errorInfo);
+                }
+            },"json");
+
+
+        }
+    }
+
+    /**
+     * 打开用户个人中心页面
+     */
+    function userInfo(){
+        let uId=$("#uId").val();
+        window.location.href="/userInfo?userId="+uId;
+    }
+
+    // 修改密码
+    function usermodifyPwd(){
+        let uId=$("#uId").val();
+        layer.open({
+            type: 2,
+            title: '修改密码',
+            area: ['500px', '430px'],
+            content: '/forground/user/modifyUser.html?id='+uId //iframe的url
+        });
+    }
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

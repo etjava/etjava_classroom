@@ -1,0 +1,51 @@
+spring:
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      enabled: true #
+
+
+# 轮播图
+carouselImages: file:/home/classroomImages/carouselImages/
+# 课程中图片 - ckeditor中上传的图片
+courseImages: file:/home/classroomImages/courseImages/
+teacherImages: file:/home/classroomImages/teacherImages/
+systemImages: file:/home/classroomImages/systemImages/
+articleImages: file:/home/classroomImages/articleImages/
+# 用户头像
+userImages: file:/home/classroomImages/userImages/
+# 爬取的内容中图片映射
+crawlerImages: file:/home/classroomImages/crawlerImages/
+
+# 轮播图片上传路径
+carouselImageFilePath: /home/classroomImages/carouselImages/
+# 图片上传路径 image upload path
+courseImages2: /home/classroomImages/courseImages/
+
+
+
+# 课程和自定义帖子中的图片上传路径   course images path
+imageFilePath: /home/classroomImages/articleImages/
+# 讲师头像上传
+teacherImageFilePath: /home/classroomImages/teacherImages/
+# 用户头像上传
+userImageFilePath: /home/classroomImages/userImages/
+
+# 自动添加图片  Automatically add Pictures
+auto.filepath: /home/classroomImages/coursemodel.jpg/ # original image
+auto.targetpath: /home/classroomImages/courseImages/ # target image
+
+sysPwd:
+
+userName2:
+
+
+# 要爬取的网站
+website: https://www.cnblogs.com/
+
+realPath: /home/classroomImages/crawlerImages/
+cacheFilePath: /home/ehcache.xml
+# 图片访问路径 http://localhost/crawlerImages/xxx/xxx.jpg
+imageUrl: /crawlerImages/
+CNBLOGURI: https://www.cnblogs.com/

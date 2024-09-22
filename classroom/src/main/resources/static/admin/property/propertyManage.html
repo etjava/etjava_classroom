@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>系统属性管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+</head>
+<body>
+
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>系统属性管理</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div>
+            <table width="100%" id="linkListTable" ></table>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+
+        table.render({
+            elem: '#linkListTable'
+            ,url:'/admin/property/list'
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', width:100,title: '编号'}
+                ,{field:'key', width:150,title: '系统属性key'}
+                ,{field:'value', width:500,title: '系统属性值'}
+                ,{field:'remark', title: '描述',align:'center'}
+                ,{field:'action', width:150, title: '操作',align:'center',templet:formatAction}
+            ]]
+        });
+    });
+
+
+    function modifyProperty(id){
+        layer.open({
+            type: 2,
+            title: '修改系统属性',
+            area: ['600px', '700px'],
+            content: '/admin/property/updateProperty.html?id='+id //iframe的url
+        });
+    }
+
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifyProperty("+d.id+")'><i class='layui-icon layui-icon-edit'></i>编辑</button>";
+    }
+
+
+</script>
+</body>
+</html>

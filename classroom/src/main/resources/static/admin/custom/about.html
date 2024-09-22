@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>关于我们</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        table tr td{
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>关于我们</cite></a>
+			</span>
+</div>
+
+
+<div style="padding: 20px">
+    <form class="layui-form" action=""  method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">关于我们：</label>
+            <div class="layui-input-block">
+                <textarea type="text" class="ckeditor" id="content" name="content" class="layui-input" ></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" onclick="submitData();return false;">提交</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script src="/ckeditor/ckeditor.js"></script>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    // 保存到临时变量中 最后统一提交
+    blogTypeId=-1; // 课程类别ID
+
+
+    layui.use(['element','form'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        // 获取关于我们信息
+        $.post("/admin/article/findById",{id:3},function(result){
+            if(result.success){
+                var article=result.article;
+
+                //判定 Content 是否存在
+                if(!CKEDITOR.instances['content']){
+                    editor = CKEDITOR.replace('content');
+                }else{
+                    CKEDITOR.instances.content.destroy();
+                    CKEDITOR.replace('content');
+                }
+                CKEDITOR.instances.content.setData(article.content);
+
+            }else{
+                layer.alert("服务器加载有问题，请联系管理员！");
+            }
+        },"json");
+    });
+
+
+    function submitData(){
+        var content=CKEDITOR.instances.content.getData();
+
+        if(content=="") {
+            layer.alert("内容不能为空！");
+            return false;
+        }
+        $.post("/admin/article/save",{id:3,content:content},function(result){
+            if(result.success){
+                layer.alert('修改成功！',function () {
+                    window.parent.openPage('custom/about.html');
+                });
+            }else{
+                layer.alert(result.errorInfo);
+            }
+        },"json");
+    }
+</script>
+</body>
+</html>

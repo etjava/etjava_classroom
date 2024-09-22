@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>添加或者修毕设课题信息</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style type="text/css">
+
+        table tr td{
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+<div style="padding: 20px">
+    <form class="layui-form" action="" lay-filter="aaaaaa">
+        <div class="layui-form-item">
+            <label class="layui-form-label">课题名称</label>
+            <div class="layui-input-block">
+                <input type="hidden" name="id" id="id">
+                <input type="text" name="courseName" id="courseName" required  lay-verify="required" placeholder="课题名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">技术类型</label>
+            <div class="layui-input-block">
+                <input type="text" name="courseType" id="courseType" required  lay-verify="required" placeholder="技术类型" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">下载地址 (github)</label>
+            <div class="layui-input-block">
+                <input type="text" name="courseUrl" id="courseUrl" required  lay-verify="required" placeholder="下载地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">is vip ?</label>
+            <div class="layui-input-block">
+                <input type="radio" name="isVip" value="1" title="是">
+                <input type="radio" name="isVip" value="0" title="否" checked>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">课题状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="state" value="1" title="正常" checked>
+                <input type="radio" name="state" value="0" title="禁止">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <button class="layui-btn" lay-submit lay-filter="formDemo">保存</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['form'], function(){
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            layer.msg(JSON.stringify(data.field));
+            console.log(data.field)
+            $.ajax({
+                url: "/admin/graduation/save",
+                type: 'POST',
+                contentType: 'application/json', // 设置为JSON格式
+                data: JSON.stringify(data.field), // 发送JSON格式数据
+                dataType:'json',
+                success: function(response) {
+                    // 请求成功时的回调函数
+                    console.log(response);
+                    layer.alert('添加成功！',function () {
+                        parent.reloadPage();
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // 请求失败时的回调函数
+                    console.error(error);
+                    $("#errorInfo").text(result.errorInfo);
+                }
+            });
+
+            return false;
+        });
+
+        var id=getQueryVariable("id");
+        if(id){
+            $("#id").val(id);
+            $.post("/admin/graduation/findById",{id:id},function(result){
+                if(result.success){
+                    var design=result.design;
+                    // layui方法给form表单回填值
+                    // aaaaaa是form表单的lay-filter属性的值
+                    form.val("aaaaaa",{
+                        "courseName": design.courseName,
+                        "courseUrl": design.courseUrl,
+                        "courseType": design.courseType,
+                        "isVip": design.isVip,
+                        "state": design.state
+                    });
+                }else{
+                    layer.alert('服务器错误，请联系管理员！');
+                }
+            },"json");
+        }
+    });
+
+    function getQueryVariable(variable){
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+    $(function(){
+
+    });
+
+</script>
+</body>
+</html>

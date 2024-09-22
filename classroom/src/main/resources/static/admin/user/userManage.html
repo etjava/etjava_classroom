@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<link>
+<meta charset="UTF-8">
+<title>用户管理</title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<style>
+
+</style>
+</head>
+<body>
+
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>用户管理</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div style="padding: 20px">
+            <div class="layui-form">
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">用户名称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="s_nickName"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <table width="100%" id="userListTable" ></table>
+        </div>
+    </div>
+
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级讲师等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+
+        table.render({
+            elem: '#userListTable'
+            ,url:'/admin/user/listPage'
+            ,cols: [[
+                {type:'checkbox'}
+                ,{field:'id', title: '编号',align:'center',width:80}
+                ,{field:'openid', title: 'openId',align:'center',width:200}
+                ,{field:'userName', title: '用户名称',align:'center',width:180}
+                ,{field:'email', title: '电子邮件',align:'center',width:180}
+                ,{field:'registerDate', title: '注册日期',align:'center',width:180}
+                ,{field:'type', title: '用户类型',align:'center',width:180}
+                ,{field:'state', title: '用户状态',align:'center',width:180}
+                ,{field:'imageName', title: '头像图片',align:'center',width:180,templet:formatImageName}
+                ,{field:'addr', title: '最后登录地址',align:'center',width:180}
+                ,{field:'action',width: '300', title: '操作',align:'center',templet:formatAction}
+            ]]
+            ,page: true
+        });
+
+    });
+
+
+    function search(){
+        var s_nickName=$("#s_nickName").val();
+        table.reload("userListTable",{
+            page:{
+                curr:1
+            }
+            ,where:{
+                name:s_nickName
+            }
+        })
+    }
+
+    function queryUser(id){
+        layer.open({
+            type: 2,
+            title: '查看用户信息',
+            area: ['750px', '550px'],
+            content: '/admin/user/userInfo.html?id='+id //iframe的url
+        });
+    }
+
+    function modifyUserImage(id){
+        layer.open({
+            type: 2,
+            title: '修改用户头像',
+            area: ['500px', '500px'],
+            content: '/admin/user/saveUserImage.html?id='+id //iframe的url
+        });
+    }
+
+
+    function formatAction(d){
+        if(d.imageName.includes("http")){
+            return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='queryUser("+d.id+")'>" +
+                "<i class='layui-icon layui-icon-edit'></i>查看</button>" ;
+        }else{
+            return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifyUserImage("+d.id+")'><i class='layui-icon layui-icon-edit'></i>修改头像</button>" +
+                "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='queryUser("+d.id+")'><i class='layui-icon layui-icon-edit'></i>查看</button>";
+        }
+    }
+
+    function formatImageName(d) {
+        if(d.imageName.includes("http")){
+            return "<img  src='"+d.imageName+"' width='30px'/>";
+        }else{
+            return "<img  src='/userImages/"+d.imageName+"' width='30px'/>";
+        }
+    }
+
+
+
+</script>
+</body>
+</html>

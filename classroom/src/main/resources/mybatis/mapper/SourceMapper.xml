@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.SourceMapper">
+
+    <insert id="add" parameterType="Source">
+        insert into t_source values(null,#{title},#{password},now(),#{source},now(),#{downloadAddress},#{extract})
+    </insert>
+    
+    <update id="modify" parameterType="Source">
+        update t_source
+        <set>
+            <if test="title!=null">
+                title=#{title},
+            </if>
+            <if test="password!=null">
+                password=#{password},
+            </if>
+            <if test="source!=null">
+                source=#{source},
+            </if>
+            <if test="downloadAddress!=null">
+                downloadAddress=#{downloadAddress},
+            </if>
+            <if test="extract!=null">
+                extract=#{extract},
+            </if>
+            <if test="updateTime!=null">
+                updateTime=#{updateTime},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="findByIdAndPwd" parameterType="Source" resultType="Integer">
+        select count(1) from t_source where id=#{id} and password=#{password}
+    </select>
+    
+    <delete id="remove" parameterType="Integer">
+        delete from t_source where id=#{id}
+    </delete>
+    
+    <select id="findById" parameterType="Integer" resultType="Source">
+        select * from t_source where id=#{id}
+    </select>
+    
+    <select id="list" parameterType="Map" resultType="Source">
+        select * from t_source
+        <where>
+            <if test="title!=null">
+                title like concat('%',#{title},'%')
+            </if>
+        </where>
+        order by addDate desc
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Integer">
+        select count(1) from t_source
+        <where>
+            <if test="title!=null">
+                title like concat('%',#{title},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

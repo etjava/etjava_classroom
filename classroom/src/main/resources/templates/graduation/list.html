@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8"/>
+<link rel="icon" href="/images/favicon.ico">
+<meta name="keywords" th:content="${title}">
+<meta name="description" th:content="${title}">
+<link href="/images/favicon.ico" rel="SHORTCUT ICON">
+<title th:text="${application.propertyMap['k19']}+'|'+${application.propertyMap['k1']}"></title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/share.min.css">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div class="header" th:include="common/menu::#m2" />
+
+<div class="courseList_body" id="contentbody" >
+    <div class="w1220 searchContent">
+        <ul>
+            <li class="li_3">
+                <b>搜索：</b>
+                <form action="" class="layui-form">
+                    <input type="text"  th:value="${s_coursename}" name="s_coursename" placeholder="请输入您要搜索内容 " autocomplete="off" class="layui-input s_input" >
+                    <button class="layui-btn layui-btn-radius layui-btn-sm" lay-submit lay-filter="formDemo">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;搜索&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+    <div class="layui-container">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <table id="graduationList" lay-filter="test"></table>
+            </div>
+        </div>
+        <div class="w1220" style="margin-top: 20px;text-align: center">
+            <div align="center" th:utext="${pageCode}"></div>
+        </div>
+    </div>
+</div>
+<div class="footer" th:include="common/foot::#f2" style="margin-top: 10%"/>
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    layui.use(['table','form'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        //第一个实例
+        table.render({
+            elem: '#graduationList'
+            ,height: 470
+            ,url: '/graduation/list/' //数据接口
+            ,page: true //开启分页
+            ,limits:[10,200]
+            ,limit:10
+            ,cols: [[ //表头  sort: true表示冻结列
+                {field: 'id', title: '序号', width:80,  fixed: 'left',align:'center'}
+                ,{field: 'courseName', title: '课题名称', width:340}
+                ,{field: 'courseType', title: '技术类型', width:210}
+                ,{field: 'courseUrl', title: '下载连接地址', width: 208,align:'center',templet: formatCourseUrl}
+                ,{field: 'isVip', title: '会员?', width: 80, sort: true,align:'center',templet: function(d){
+                        return d.isVip == '0' ? '否' : '是';
+                    }}
+                ,{field: 'state', title: '资源状态', width: 80,align:'center',templet: function(d){
+                            return d.state == '0' ? '失效' : '正常';
+                        }}
+                ,{field: 'downloads', title: '下载次数',align:'center', width: 135, sort: true}
+            ]]
+        });
+
+        // 监听提交事件
+        form.on('submit(formDemo)', function(data){
+            // data.field.id属性名称 获取表单输入的所有值，作为对象
+            table.reload('graduationList', {
+                url:'/graduation/list',
+                method:'post',
+                where:{
+                    's_coursename':data.field.s_coursename
+                },
+                page:{
+                    curr:1 // 从第一页开始
+                }
+            });
+            return false; // 阻止表单默认提交行为
+        });
+
+    });
+
+    function formatCourseUrl(d){
+        return d.courseUrl == null ? '<font color="red">暂无下载地址</font>' : '<a onclick="downloadCourse('+d.id+')" href="javascript:;">'+d.courseName+'</a>';
+
+    }
+
+    // 点击下载资源
+    function downloadCourse(id){
+        layer.msg("下载功能正在维护...");
+    }
+
+    /*]]>*/
+</script>
+
+</body>
+</html>

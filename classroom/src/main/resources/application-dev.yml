@@ -1,0 +1,41 @@
+server:
+  port: 80
+  servlet:
+    context-path: /
+    session:
+      timeout: 7200
+  tomcat:
+    uri-encoding: utf-8
+
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/db_classroom?serverTimezone=GMT&useSSL=false&characterEncoding=utf-8
+    #url: jdbc:mysql://localhost:3306/db_classroom?serverTimezone=GMT&useSSL=false&characterEncoding=utf-8
+    username: root
+    password:
+  thymeleaf:
+    cache: false # 关闭thymeleaf缓存
+  devtools:
+    restart:
+      enabled: true #开启热部署
+      additional-paths: src/main/java,src/main/resources #设置触发自动重启的文件的扩展名，默认为 .java、.groovy、.kt、.html、.css、.js
+      poll-interval: 1s #设置触发延时重启的时间，默认为 1s
+
+
+mybatis:
+  mapper-locations: classpath*:mybatis/mapper/*.xml
+  type-aliases-package: com.etjava.entity
+  configuration:
+    map-underscore-to-camel-case: true # 驼峰命名
+    auto-mapping-behavior: full
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+page:
+  size: 10
+
+
+

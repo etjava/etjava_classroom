@@ -1,0 +1,231 @@
+<!--
+    后台管理首页面调整为tab页之前备份 by 20240918
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/images/favicon.ico">
+    <title th:text="${application.propertyMap['k1']}+' | 后台系统管理页面'"></title>
+    <link href="/images/favicon.ico" rel="SHORTCUT ICON">
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <a href="/admin" style="color: #ffffff"><div class="admin-logo"></div></a>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="/systemImages/pere-noel.png" class="layui-nav-img"><span th:text="${session.SPRING_SECURITY_CONTEXT.authentication.principal.username}" style="color: black"></span></img>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/logout">安全退出</a></dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black" id="container">
+        <div class="layui-side-scroll menu_layui" >
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <!--
+                <ul class="layui-nav layui-nav-tree"  lay-shrink="all"> 展开所有
+                    menu_layui自定义展开第一层
+                菜单嵌套
+             -->
+            <ul class="layui-nav layui-nav-tree menu_layui"  lay-filter="test">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a class="" href="javascript:;">课程管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('course/courseManage.html')">课程管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('course/hktjManage.html')">好课推荐管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('course/zxkcManage.html')">最新课程推荐管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('course/mfkcManage.html')">免费课程推荐管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('course/szkcManage.html')">实战课程推荐管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('courseType/courseTypeManage.html')">课程类别管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('feedback/feedbackManage.html')">课程反馈管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('courseType/courseTypeManage.html')">课程测试管理</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">用户管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('user/userManage.html')">用户管理</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">授课老师管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('teacher/teacherManage.html')">授课老师管理</a></dd>
+                    </dl>
+                </li>
+                <!--<li class="layui-nav-item">
+                    <a href="javascript:;">订单管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('orderManage.html')">订单管理</a></dd>
+                    </dl>
+                </li>-->
+                <li class="layui-nav-item">
+                    <a href="javascript:;">博客管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('blog/blogManage.html')">博客管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('blog/blogTypeManage.html')">博客类别管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('crawler/crawlerManage.html')">外部文章管理</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">自修课程管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('source/sourceManage.html')">自修课程管理</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">在线考试管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('paper/paperManage.html')">试卷管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('question/questionManage.html')">试题管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('exam/examManage.html')">考试成绩</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">系统管理</a>
+
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('menu/menuManage.html')">菜单管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('menu/footMenuManage.html')">底部菜单管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('link/linkManage.html')">友情链接管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('property/propertyManage.html')">系统属性设置</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('article/articleManage.html')">自定义帖子管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('carousel/carouselArticleManage.html')">轮转图片帖子管理</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:openPage('custom/about.html')">关于我们</a></dd>
+                    </dl>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:flushCache()">刷新缓存</a></dd>
+                    </dl>
+                </li>
+
+
+            </ul>
+            <span id="traineau">
+                <img src="../../images/traineau.jpg"/>
+            </span>
+        </div>
+    </div>
+
+    <div class="layui-body" >
+        <iframe id="pageFrame" frameborder='0' scrolling='auto' style='width:100%;height:98%' src="/admin/default.html"></iframe>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        Copyright © 2012-2020  广州ETJAVA网络科技有限公司 版权所有 Powered by ETJava 粤ICP备440100001
+    </div>
+</div>
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    layui.use(['element','laypage','form'], function(){
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        var $ = layui.jquery; // 使用jquery
+        var laypage = layui.laypage;
+
+    });
+
+    function openPage(page){
+        $("#pageFrame").attr("src","/admin/"+page);
+    }
+
+    function flushCache(){
+        window.location.href="/admin/user/flushCache";
+        layer.alert('刷新完成！');
+    }
+
+    $(function () {
+        // 调整菜单互斥打开
+        $(".layui-nav li>a").on("click", function (e) {
+            $(this).parent().siblings().removeClass("layui-nav-itemed").removeClass("layui-this");
+            if ($(this).parent().find("dl").length) {
+                $(this).parent().find("dl").children().eq(0).children()[0].click();
+            }
+        })
+    })
+
+
+    /*]]>*/
+</script>
+
+<style>
+    /*  菜单 */
+    .menu_layui{ background:#fff !important; border-bottom:1px solid #fff; font-weight:bold;}/*font-size:large*/
+    .menu_layui a{color:#333 !important; font-weight:bold;}
+
+    /*当前*/
+    .menu_layui .layui-this a{color: #042197 !important;}
+    /*.menu_layui .layui-this:after{background-color:#041e97 !important;}*/
+    .menu_layui .layui-anim-upbit:after{background-color:#049706FF !important;}
+
+    /* 悬浮 */
+    .menu_layui .layui-nav .layui-nav-bar{background-color:#049706FF !important;}
+    .menu_layui_left ul{background: rgba(255, 255, 25, 0) !important;}
+    .menu_layui_left a{color:#000 !important; font-weight:bold}
+    .menu_layui_left dd a{color:#333 !important; font-weight:normal; text-indent:20px}
+    .menu_layui_left .layui-nav-more{border-style: solid dashed dashed;border-color: #000 transparent transparent;}
+    .menu_layui_left .layui-nav-itemed>a .layui-nav-more{border-color: transparent transparent #000 !important;}
+    .menu_layui_left .layui-nav-item a:hover{background-color: rgba(255, 255, 255, 0.97)
+    }
+    .menu_layui_left .layui-this a{background:#041e97 !important; color:#fff !important;}
+    .layui-nav-tree .layui-this,.layui-nav-tree .layui-this>a,.layui-nav-tree .layui-nav-child dd.layui-this,.layui-nav-tree .layui-nav-child dd.layui-this a{background-color:pink !important;}
+
+    /*圣诞挂件*/
+    #traineau{
+        position: absolute; /*绝对定位*/
+        bottom: 10px;  /*底部距离*/
+        left: 50%;  /*水平居中*/
+        transform: translateX(-20%); /*微调位置*/
+        /*box-shadow: 0px 10px 20px rgba(0,0,0,0.3);*//*阴影*/
+    }
+
+    #traineau img{
+        width: 90.9%;
+    }
+</style>
+
+</body>
+</html>

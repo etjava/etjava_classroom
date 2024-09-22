@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.CourseMapper">
+
+    <resultMap type="Course" id="CourseResult">
+        <association property="courseType" column="typeId"
+                     select="com.etjava.mapper.CourseTypeMapper.findById"></association>
+
+        <association property="teacher" column="teacherId"
+                     select="com.etjava.mapper.TeacherMapper.findById"></association>
+
+    </resultMap>
+
+    <select id="hktjList"  resultMap="CourseResult">
+        select * from t_course where hktj=true order by sort1 limit 0,10
+    </select>
+
+    <select id="zxkcList"  resultMap="CourseResult">
+        select * from t_course where zxkc=true order by sort2 limit 0,10
+    </select>
+
+    <select id="freeList" resultMap="CourseResult">
+        select * from t_course where mfkc=true and type='free' order by sort3 limit 0,10
+    </select>
+
+    <!-- 实战课程 不只是查询vip课程  and type="vip" -->
+    <select id="szkcList" resultMap="CourseResult">
+        select * from t_course where szkc=true  order by sort4 limit 0,10
+    </select>
+
+    <select id="findById" parameterType="Integer" resultMap="CourseResult">
+        select * from t_course where id=#{id}
+    </select>
+    
+    <update id="updateView" parameterType="Course">
+        update t_course
+        <set>
+            <if test="name!=null and name!=''">
+                name=#{name},
+            </if>
+            <if test="teacher.id!=null">
+                teacherId=#{teacher.id},
+            </if>
+            <if test="courseType.id!=null">
+                typeId=#{courseType.id},
+            </if>
+            <if test="imageName!=null and imageName!=''">
+                imageName=#{imageName},
+            </if>
+            <if test="type!=null and type!=''">
+                type=#{type},
+            </if>
+            <if test="view!=null">
+                view=#{view},
+            </if>
+            <if test="introduction!=null and introduction!=''">
+                introduction=#{introduction},
+            </if>
+            <if test="catalog!=null and catalog!=''">
+                catalog=#{catalog},
+            </if>
+            <if test="download!=null and download!=''">
+                download=#{download},
+            </if>
+            <if test="url!=null and url!=''">
+                url=#{url},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="randomCourse" resultMap="CourseResult">
+        select * from t_course order by rand() limit 10
+    </select>
+    
+    <select id="search" parameterType="Map" resultMap="CourseResult">
+        select * from t_course
+        <where>
+            <if test="name!=null and name!='' ">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="typeId!=null and typeId!=0 ">
+                and typeId=#{typeId}
+            </if>
+            <if test="type!=null and type!='all' ">
+                and type=#{type}
+            </if>
+        </where>
+        order by id desc
+        <if test="start!=null and size!=null ">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Long">
+        select count(1) from t_course
+        <where>
+            <if test="name!=null and name!='' ">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test="typeId!=null and typeId!=0 ">
+                and typeId=#{typeId}
+            </if>
+            <if test="type!=null and type!='all' ">
+                and type=#{type}
+            </if>
+        </where>
+    </select>
+
+    <insert id="add" parameterType="Course">
+        insert into t_course values(null,#{name},#{imageName},#{type},#{view}
+                                   ,#{introduction},#{catalog},#{download},#{url}
+                                   ,#{hktj},#{sort1},#{zxkc},#{sort2}
+                                   ,#{mfkc},#{sort3},#{szkc},#{sort4}
+                                   ,#{courseType.id},#{teacher.id})
+    </insert>
+    
+    
+    <delete id="removeCourse" parameterType="Integer">
+        delete from t_course where id=#{id}
+    </delete>
+
+
+    <!--
+        好课推荐相关操作
+    -->
+    <!-- 推荐课程列表-->
+    <select id="recommentList" parameterType="Map" resultMap="CourseResult">
+        select * from t_course where hktj=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+        order by sort1
+        <if test="start!=null and size!=null ">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <select id="hktjTotal" parameterType="Map" resultType="Long">
+        select count(1) from t_course where hktj=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+    </select>
+
+    <!--修改好课推荐-->
+    <update id="updateHktj" parameterType="Course">
+        update t_course
+        <set>
+            <if test="hktj!=null">
+                hktj=#{hktj},
+            </if>
+            <if test="sort1!=null">
+                sort1=#{sort1},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--
+        最新课程相关操作
+    -->
+    <select id="latestCourseList" parameterType="Map" resultMap="CourseResult">
+        select * from t_course where zxkc=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+        order by sort2
+        <if test="start!=null and size!=null ">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <select id="latestCourseTotal" parameterType="Map" resultType="Long">
+        select count(1) from t_course where zxkc=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+    </select>
+
+    <!--修改最新课程-->
+    <update id="updateLatestCourse" parameterType="Course">
+        update t_course
+        <set>
+            <if test="zxkc!=null">
+                zxkc=#{zxkc},
+            </if>
+            <if test="sort2!=null">
+                sort2=#{sort2},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <!--
+        免费课程相关操作
+    -->
+    <select id="freeCourseList" parameterType="Map" resultMap="CourseResult">
+        select * from t_course where mfkc=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+        order by sort3
+        <if test="start!=null and size!=null ">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <select id="freeCourseTotal" parameterType="Map" resultType="Long">
+        select count(1) from t_course where mfkc=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+    </select>
+
+    <!--修改免费课程-->
+    <update id="updateFreeCourse" parameterType="Course">
+        update t_course
+        <set>
+            <if test="mfkc!=null">
+                mfkc=#{mfkc},
+            </if>
+            <if test="sort3!=null">
+                sort3=#{sort3},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <!--
+        实战课程相关操作
+    -->
+    <select id="practicalCourseList" parameterType="Map" resultMap="CourseResult">
+        select * from t_course where szkc=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+        order by sort4
+        <if test="start!=null and size!=null ">
+            limit #{start},#{size}
+        </if>
+    </select>
+    <select id="practicalCourseTotal" parameterType="Map" resultType="Long">
+        select count(1) from t_course where szkc=true
+        <if test="name!=null and name!='' ">
+            and name like concat('%',#{name},'%')
+        </if>
+    </select>
+
+    <!--修改免费课程-->
+    <update id="updatePracticalCourse" parameterType="Course">
+        update t_course
+        <set>
+            <if test="szkc!=null">
+                szkc=#{szkc},
+            </if>
+            <if test="sort4!=null">
+                sort4=#{sort4},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <!--根据课程类别ID统计课程数量-->
+    <select id="findByTypeId" parameterType="Integer" resultType="Long">
+        select count(1) from t_course where typeId=#{typeId}
+    </select>
+
+    <!--根据讲师ID统计课程数量-->
+    <select id="findByTeacherId" parameterType="Integer" resultType="Long">
+        select count(1) from t_course where teacherId=#{teacherId}
+    </select>
+
+</mapper>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.CrawlerBlogMapper">
+    <resultMap id="BlogResultMap" type="CrawlerBlog">
+        <association property="blogType" column="typeId"
+                     select="com.etjava.mapper.BlogTypeMapper.findById"></association>
+    </resultMap>
+    <select id="list" parameterType="Map" resultMap="BlogResultMap">
+        select * from t_crawlerblog
+        <where>
+            <if test="title!=null and title!='' ">
+                and title like concat('%',#{title},'%')
+            </if>
+            <if test="typeId!=null">
+                and typeId=#{typeId}
+            </if>
+            <!-- 只有前端不传递状态 -->
+            <if test="state==null">
+                and state=1
+            </if>
+            <if test="state!=null and state!=-1">
+                and state=#{state}
+            </if>
+        </where>
+        order by createDate desc
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Long">
+        select count(1) from t_crawlerblog
+        <where>
+            <if test="title!=null and title!='' ">
+                and title like concat('%',#{title},'%')
+            </if>
+            <if test="typeId!=null">
+                and typeId=#{typeId}
+            </if>
+            <!-- 只有前端不传递状态 -->
+            <if test="state==null">
+                and state=1
+            </if>
+            <if test="state!=null and state!=-1">
+                and state=#{state}
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultMap="BlogResultMap">
+        select * from t_crawlerblog where id=#{id}
+    </select>
+
+    <update id="modify" parameterType="CrawlerBlog">
+        update t_crawlerblog
+        <set>
+            <if test="title!=null and title!=''">
+                title=#{title},
+            </if>
+            <if test="reads!=null">
+                `reads`=(`reads`+1),
+            </if>
+            <if test="state!=null">
+                state = #{state},
+            </if>
+            <if test="blogType!=null and blogType.id!=null">
+                typeId=#{blogType.id},
+            </if>
+            <if test="content!=null">
+                content=#{content},
+            </if>
+            <if test="summary!=null">
+                summary=#{summary},
+            </if>
+            <if test="releaseDate!=null">
+                releaseDate=now()
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="prevArticle" parameterType="Integer" resultType="BlogPrevAndNext">
+        SELECT t1.id AS prevId ,t1.title as prevTitle FROM t_crawlerblog t1 WHERE t1.id &lt;#{id} ORDER BY t1.id DESC LIMIT 1
+    </select>
+
+    <select id="nextArticle" parameterType="Integer" resultType="BlogPrevAndNext">
+        SELECT t1.id AS nextId ,t1.title as nextTitle FROM t_crawlerblog t1 WHERE t1.id &gt;#{id} ORDER BY t1.id ASC LIMIT 1
+    </select>
+
+    <insert id="save" parameterType="CrawlerBlog">
+        insert into t_crawlerblog values(null,#{title},#{summary},null,#{reads},#{content},#{blogType.id},0,#{originalUrl},now())
+    </insert>
+</mapper>

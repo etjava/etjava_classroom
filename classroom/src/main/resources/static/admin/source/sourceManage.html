@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>自修课程管理</title>
+  <link rel="stylesheet" href="/layui/css/layui.css"></link>
+  <link rel="stylesheet" href="/css/css.css"></link>
+  <style>
+    .layui-table-body .layui-table-cell{
+      height:50px;
+      line-height: 50px;
+    }
+  </style>
+</head>
+<body>
+
+<div style="padding: 20px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+			  <a><cite>自修课程管理</cite></a>
+			</span>
+  <div style="padding-top: 20px;">
+    <div style="padding: 20px">
+      <div class="layui-form">
+        <div class="layui-inline">
+          <label class="layui-form-label">课程名称：</label>
+          <div class="layui-input-inline">
+            <input type="text" id="s_name"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+          </div>
+        </div>
+        <div class="layui-inline">
+          <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+            <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div>
+        <button class="layui-btn layuiadmin-btn-list" data-type="batchdel" onclick="addSource()">添加课程</button>
+        <p style="color: darkorange">名称颜色为绿色 表示播放密码发生了改变</p>
+      </div>
+    </div>
+    <div>
+      <table width="100%" id="sourceListTable" ></table>
+    </div>
+  </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+  layui.use(['element','form','table'], function(){
+    var form=layui.form;
+    var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+    $ = layui.jquery; // 使用jquery
+    table = layui.table;
+    table.render({
+      elem: '#sourceListTable'
+      ,url:'/admin/source/list'
+      ,cols: [[
+        {type:'checkbox'}
+        ,{field:'id', width:60,align:'center',width:80,title: '编号'}
+        ,{field:'title',align:'center', width:200,title: '课程名称',templet:formatTitle}
+        ,{field:'password',align:'center',width:200, title: '播放密码'}
+        ,{field:'addDate',align:'center', width:200,title: '创建日期'}
+        ,{field:'source',align:'center', width:200,title: '课程来源'}
+        ,{field:'updateTime',align:'center', width:200,title: '课程更新日期'}
+        ,{field:'downloadAddress',align:'center', width:250,title: '下载地址',templet:formatDownload}
+        ,{field:'extract',align:'center', width:150,title: '提取密码'}
+        ,{field:'action',align:'center', width:300, title: '操作',align:'center',templet:formatAction}
+      ]]
+      ,page: true
+    });
+  });
+
+
+  function search(){
+    var s_name=$("#s_name").val();
+    table.reload("sourceListTable",{
+      page:{
+        curr:1
+      }
+      ,where:{
+        s_name:s_name
+      }
+    })
+  }
+
+  function formatDownload(d){
+    return "<a href='"+d.downloadAddress+"?pwd="+d.extract+"' target='_blank'>"+d.downloadAddress+"</a>";
+  }
+
+  function formatTitle(d){
+    let addDate = d.addDate;
+    let updateTime = d.updateTime;
+    if(addDate!=updateTime){
+      return "<font color=green>"+d.title+"</font>";
+    }else{
+      return d.title;
+    }
+  }
+
+  function deleteOne(id){
+    layer.confirm('您确定要删除这条记录吗？', {
+      title:"系统提示"
+      ,btn: ['确定','取消'] //按钮 - 有几个按钮就要写几个function 按顺序对应
+    }, function(){ // 确定按钮
+      layer.closeAll('dialog');
+      $.post("/admin/source/delete",{"id":id},function(result){
+        if(result.success){
+          layer.msg("删除成功！");
+          table.reload("sourceListTable",{});
+        }else{
+          layer.msg("删除失败，请联系管理员！");
+        }
+      },"json");
+    }, function(){ // 取消按钮
+      // 点击取消时的操作
+    });
+  }
+
+  function addSource(){
+    layer.open({
+      type: 2,
+      title: '添加课程',
+      area: ['800px', '550px'],
+      content: '/admin/source/saveSource.html' //iframe的url
+    });
+  }
+
+  function modifySource(id){
+    layer.open({
+      type: 2,
+      title: '修改课程',
+      area: ['800px', '550px'],
+      content: '/admin/source/saveSource.html?id='+id //iframe的url
+    });
+  }
+
+  function formatAction(d){
+    return "<button class='layui-btn layui-btn-normal layui-btn-xs' onclick='modifySource("+d.id+")'><i class='layui-icon layui-icon-edit'></i>修改课程</button>" +
+            "<button class='layui-btn layui-btn-warm layui-btn-xs' onclick='deleteOne("+d.id+")'><i class='layui-icon layui-icon-delete' ></i>删除</button>";
+  }
+
+</script>
+</body>
+</html>

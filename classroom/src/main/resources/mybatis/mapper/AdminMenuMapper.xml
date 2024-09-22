@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.etjava.mapper.AdminMenuMapper">
+
+    <select id="parentList" resultType="AdminMenu">
+        SELECT  * FROM t_adminmenu WHERE parentId!=-1 GROUP BY parentId
+--         SELECT a.* FROM t_adminmenu a LEFT JOIN t_adminmenu b ON a.id IN (b.parentId) AND b.parentId=-1
+    </select>
+    
+    <select id="findByParentId" parameterType="Integer" resultType="AdminMenu">
+        select * from t_adminmenu where parentId in (#{parentId})
+    </select>
+</mapper>
