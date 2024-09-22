@@ -8,4 +8,58 @@
     <select id="findByFunName" parameterType="String" resultType="Access">
         select * from t_access where funName=#{funName}
     </select>
+    <select id="list" parameterType="Map" resultType="Access">
+        select * from t_access
+        <where>
+            <if test="funName!=null">
+                and funName like concat('%',#{funName},'%')
+            </if>
+        </where>
+        <if test="start!=null and size!=null">
+            limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="total" parameterType="Map" resultType="Integer">
+        select count(*) as total from t_access
+        <where>
+            <if test="funName!=null">
+                and funName like concat('%',#{funName},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="Integer" resultType="Access">
+        select * from t_access where id=#{id}
+    </select>
+
+    <insert id="save" parameterType="Access">
+        insert into t_access values(null,#{funName},#{requestUrl},#{isAccess},#{accessTime})
+    </insert>
+
+    
+    <update id="modify" parameterType="Access">
+        update t_access
+        <set>
+            <if test="funName!=null">
+                funName=#{funName},
+            </if>
+            <if test="requestUrl!=null">
+                requestUrl=#{requestUrl},
+            </if>
+            <if test="isAccess!=null">
+                isAccess=#{isAccess},
+            </if>
+            <if test="accessTime!=null">
+                accessTime=#{accessTime},
+            </if>
+        </set>
+            where id=#{id}
+    </update>
+    
+    <delete id="remove" parameterType="Integer">
+        delete from t_access where id=#{id}
+    </delete>
+
+
 </mapper>

@@ -126,6 +126,18 @@
 
 </div>
 
+<div class="sidenav">
+    <ul>
+        <!--<li><a><span class="bg"></span><span>京东秒杀</span></a></li>
+        <li><a><span class="bg"></span><span>特色优选</span></a></li>
+        <li><a><span class="bg"></span><span>频道广场</span></a></li>
+        <li><a><span class="bg"></span><span>为你推荐</span></a></li>-->
+        <li><a><span class="bg"></span><img src="/myIcons/kf.png" /><span> 联系</span></a></li>
+        <li class="back-to-top"><a><span class="bg"></span><img src="/myIcons/top.png" /><span> 顶部</span></a></li>
+    </ul>
+</div>
+
+
 <div class="footer" th:include="common/foot::#f" style="margin-top: 10%"/>
 
 <script src="/layui/layui.js"></script>
@@ -135,13 +147,25 @@
 <script src="/js/common.js"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
-    layui.use(['element','laypage'], function(){
+    layui.use(['element','laypage','layer'], function(){
         var laypage = layui.laypage;
+        var layer=layui.layer;
         //执行一个laypage实例
         laypage.render({
             elem: 'test1' //注意，这里的 test1 是 ID，不用加 # 号
             ,count: 50 //数据总数，从服务端得到
         });
+
+        // 屏幕中央弹出窗口提示
+        // layer.open({
+        //     type: 1,
+        //     title: false, // 不显示标题栏
+        //     //closeBtn: false, // 不显示关闭按钮
+        //     //shade: 0.8, // 遮罩层
+        //     area: ['300px', '200px'], // 宽高
+        //     //offset: 'rt', // 右上角定位
+        //     content: '<div style="padding:10px;">这是内容区域</div>' // 内容
+        // });
     });
 
     function selectTypeId(typeId){
@@ -173,6 +197,26 @@
         window.location.href="/blogType/more";
     }
 
+
+
+    // 返回顶部
+    let backToTopBtn = document.querySelector('.back-to-top');
+    backToTopBtn.style.display = 'none';
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300 || document.documentElement.scrollTop > 300) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+    backToTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
     /*]]>*/
 </script>
 

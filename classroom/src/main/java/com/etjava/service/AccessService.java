@@ -2,6 +2,9 @@ package com.etjava.service;
 
 import com.etjava.entity.Access;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @Author: ETJAVA
  * @CreateTime: 2024-09-19  21:24
@@ -10,5 +13,18 @@ import com.etjava.entity.Access;
  */
 public interface AccessService {
 
+
     Access findByFunName(String funName);
+
+    List<Access> list(Map<String,Object> map);
+
+    Access findById(Integer id);
+
+    Map<String,Object> save(Access access);
+
+    Integer remove(Integer id);
+
+    Integer total(Map<String,Object> map);
+
+
 }

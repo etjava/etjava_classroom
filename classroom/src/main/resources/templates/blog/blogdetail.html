@@ -134,6 +134,11 @@
 
 <div class="footer" th:include="common/foot::#f" style="margin-top: 10%"/>
 
+<div class="sidenav">
+    <ul>
+        <li class="back-to-top"><a><span class="bg"></span><img src="/myIcons/top.png" /><span> 顶部</span></a></li>
+    </ul>
+</div>
 
 <script src="/layui/layui.js"></script>
 <script src="/layui/layui.all.js"></script>
@@ -215,7 +220,24 @@
     }
 
 
+    // 返回顶部
+    let backToTopBtn = document.querySelector('.back-to-top');
+    backToTopBtn.style.display = 'none';
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300 || document.documentElement.scrollTop > 300) {
+            backToTopBtn.style.display = 'block';
+        } else {
+            backToTopBtn.style.display = 'none';
+        }
+    });
+    backToTopBtn.addEventListener('click', (e) => {
+        e.preventDefault();
 
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 
 
 

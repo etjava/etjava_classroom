@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>功能访问管理</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"></link>
+    <link rel="stylesheet" href="/css/css.css"></link>
+    <style>
+        .layui-table-body .layui-table-cell{
+            height:50px;
+            line-height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 35px">
+	        <span class="layui-breadcrumb">
+			  <a>首页</a>
+              <a><cite>系统管理</cite></a>
+			  <a><cite>功能访问管理</cite></a>
+			</span>
+    <div style="padding-top: 20px;">
+        <div style="padding: 20px;text-align: center">
+            <div class="layui-form">
+                <div class="layui-inline">
+                    <label class="layui-form-label">功能名称：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="s_funname"  placeholder="请输入" autocomplete="off" style="width: 400px" class="layui-input" onkeydown="if(event.keyCode==13) search()"/>
+                    </div>
+                </div>
+
+
+                <div class="layui-inline">
+                    <button class="layui-btn layuiadmin-btn-list"  lay-submit="" onclick="search()" lay-filter="LAY-app-contlist-search">
+                        <i class="layui-icon layui-icon-search layuiadmin-button-btn" ></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div>
+                <button class="layui-btn layuiadmin-btn-list" data-type="batchdel" onclick="addFunction()">添加功能</button>
+            </div>
+        </div>
+        <div>
+            <table width="100%" id="accessListTable" ></table>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/common.js"></script>
+<script type="text/javascript">
+
+    layui.use(['element','form','table'], function(){
+        var form=layui.form;
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+        $ = layui.jquery; // 使用jquery
+        table = layui.table;
+        table.render({
+            //id: 'id', // 隐藏id列 如果是多列 使用逗号隔开 如 id: 'id,username'
+            elem: '#accessListTable'
+            ,url:'/admin/access/list'
+            ,size:'sm'
+            ,cols: [[
+                {field:'id', width:60,title: '编号'}
+                ,{field:'funName', width:200,title: '功能名称'}
+                ,{field:'requestUrl',width:200, title: '访问路径'}
+                ,{field:'isAccess', width:100,title: '访问？',templet:formatAccess}
+                ,{field:'accessTime', width:260,title: '可访问时间(该时间之前允许访问)'}
+                ,{field:'action',  title: '操作',align:'center',templet:formatAction}
+            ]]
+            ,page: true
+        });
+
+    });
+
+
+    function search(){
+        var s_funname=$("#s_funname").val();
+        table.reload("accessListTable",{
+            page:{
+                curr:1
+            }
+            ,where:{
+                s_funname:s_funname
+            }
+        })
+    }
+
+    function deleteOne(id){
+        layer.confirm('您确定要删除这条记录吗？', {
+            title:"系统提示"
+            ,btn: ['确定','取消'] //按钮 - 有几个按钮就要写几个function 按顺序对应
+        }, function(){ // 确定按钮
+            layer.closeAll('dialog');
+            $.post("/admin/access/delete",{"id":id},function(result){
+                if(result.success){
+                    layer.msg("删除成功！");
+                    table.reload("accessListTable",{});
+                }else{
+                    layer.msg("删除失败，请联系管理员！");
+                }
+            },"json");
+        }, function(){ // 取消按钮
+            // 点击取消时的操作
+        });
+    }
+
+    function addFunction(){
+        layer.open({
+            type: 2,
+            title: '添加访问功能',
+            area: ['800px', '500px'],
+            content: '/admin/sys/addAccess.html' //iframe的url
+        });
+    }
+
+    function modifyFunction(id){
+        layer.open({
+            type: 2,
+            title: '修改访问功能',
+            area: ['800px', '500px'],
+            content: '/admin/sys/addAccess.html?id='+id //iframe的url
+        });
+    }
+
+    function formatAction(d){
+        return "<button class='layui-btn layui-btn-primary layui-btn-xs' onclick='modifyFunction("+d.id+")'><i class='layui-icon layui-icon-edit'></i>修改</button>" +
+            "<button class='layui-btn layui-btn-primary layui-btn-xs' onclick='deleteOne("+d.id+")'><i class='layui-icon layui-icon-delete' ></i>删除</button>";
+    }
+
+    function formatAccess(d) {
+        return d.isAccess==0?"<font color='red'>否</font>":"<font color='green'>允许访问</font>";
+    }
+
+</script>
+</body>
+</html>

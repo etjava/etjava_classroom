@@ -630,3 +630,76 @@ body{
 .course_body .space{
     height: 40px;
 }
+
+
+/*博客列表页面 右侧悬浮窗*/
+.sidenav ul, li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidenav {
+    position: relative;
+}
+
+.sidenav > ul {
+    background: #fff;
+    position: fixed;
+    top: 500px;
+    right: 50px;
+    width: 60px;
+}
+
+.sidenav > ul > li {
+    list-style: none;
+    width: 58px;
+    height: 60px;
+}
+
+
+.sidenav > ul > li > a {
+    display: block;
+    width: 28px;
+    height: 38px;
+    font-size: 14px;
+    padding: 10px 16px;
+    position: relative;
+}
+
+.sidenav > ul > li > a::after {
+    position: absolute;
+    width: 40px;
+    height: 1px;
+    bottom: 1px;
+    left: 50%;
+    margin-left: -20px;
+    content: "";
+    background: linear-gradient(270deg, white, rgb(238, 238, 238), rgb(238, 238, 238), white);;
+    z-index: 1;
+}
+
+.sidenav > ul > li > a > .bg {
+    position: absolute;
+    top: -1px;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    background: transparent;
+    z-index: 2;
+}
+
+.sidenav > ul > li:hover > a > .bg {
+    background: #0094ff;
+}
+.sidenav > ul > li > a >img {
+    display:block;
+    width:18px;
+    height:16px;
+    margin:0 auto;
+    position:relative;
+    z-index:3;
+}
+.sidenav > ul > li > a > span:last-child {
+    position:relative;
+    z-index:3;
+}
