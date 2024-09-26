@@ -43,8 +43,19 @@
     <div>
         <a href="/" class="logo"></a>
         <!--导航菜单-->
-        <ul class="nav">
+        <!--<ul class="nav">-->
+        <ul class="nav" lay-filter="">
             <li th:each="menu:${application.menuList}"><a th:href="${menu.url}" th:style="'color:'+${menu.color}+';font-weight:'+${menu.strong==true?'bold':'normal'}" th:text="${menu.name}"></a></li>
+            <li>
+                <div class="dropdown">
+                    <button class="dropbtn">Framework</button>
+                    <div class="dropdown-content">
+                        <span th:each="fmenu:${application.frameworkTypeList}" >
+                            <a href="javascript:;"  th:onclick="'openFrameworkPage(\'' + ${fmenu.id} + '\')'" th:text="${fmenu.typeName}"></a>
+                        </span>
+                    </div>
+                </div>
+            </li>
         </ul>
 
         <div class="searchAndLogin">

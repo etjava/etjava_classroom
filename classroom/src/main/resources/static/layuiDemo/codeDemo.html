@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>layui前端展示代码高亮</title>
+    <!-- 请勿在项目正式环境中引用该 layui.css 地址 -->
+    <link href="/layui/css/layui.css" rel="stylesheet">
+</head>
+<body>
+<pre class="layui-code">
+    Layui代码高亮必须确保pre标签中存在class="layui-code"样式 否则不生效
+</pre>
+<hr>
+《123》
+<pre class="layui-code">
+    <h3>这是普通文本数据</h3>
+<code class="language-java">
+    // 创建索引库
+    public static void createIndex()throws Exception{
+        // 1. 创建Directory对象 封装索引库所在位置
+        Directory directory = FSDirectory.open(Paths.get("D://lucene6"));
+        // 2. 创建IndexWriterConfig对象 配置中文分析器SmartChineseAnalyzer
+        IndexWriterConfig config = new IndexWriterConfig(new SmartChineseAnalyzer());
+        // 3. 创建IndexWriter对象 用来向索引库中写索引
+        IndexWriter writer = new IndexWriter(directory,config);
+        // 4. 定义测试数据
+        Integer[] ids = {1,2,3,4};
+        String[] citys = {"广州","深圳","佛山","惠州"};
+        String[] descs = {
+                "广州是广东省的省会城市",
+                "深圳是特区城市",
+                "佛山是美食城市",
+                "惠州是历史悠久的城市"
+        };
+        // 5. 向索引库中写索引
+        for (int i=0;i&lt;ids.length;i++) {
+            // 6. 创建文档对象
+            Document document = new Document();
+            // 7. 将原始数据添加到文档域
+            TextField fieldId = new TextField("ids",String.valueOf(ids[i]), Field.Store.YES);
+            TextField fieldCitys = new TextField("citys",citys[i], Field.Store.YES);
+            TextField fieldDesc = new TextField("descs",descs[i], Field.Store.YES);
+            // 8. 将文档域添加到文档中
+            document.add(fieldId);
+            document.add(fieldCitys);
+            document.add(fieldDesc);
+            // 9. 添加索引到索引库
+            writer.addDocument(document);
+        }
+        int ramDocs = writer.numRamDocs();
+        // 10. 关闭写索引对象
+        writer.close();
+
+        System.out.println("一个写了 "+ramDocs+" 个文档");
+    }</code></pre>
+
+<h1>luke工具查看创建出来的索引</h1>
+
+<p><img alt="" src="https://cdn.jsdelivr.net/gh/etjava/TyporaPIC/img/202404051418453.png" style="height:680px; width:950px" /></p>
+
+<h1>查询索引</h1>
+
+<pre>
+<code class="language-java">/**
+     * 查询索引
+     * @param indexDir 索引库的位置
+     * @param q 要查询的内容
+     * @throws Exception
+     */
+    public static void searchIndex(String indexDir,String q) throws Exception{
+        // 1. 创建Directory镀锡 封装索引库位置
+        Directory directory = FSDirectory.open(Paths.get(indexDir));
+        // 2. 创建IndexReader对象 用来读取索引信息
+        IndexReader indexReader = DirectoryReader.open(directory);
+        // 3. 创建IndexSearch对象 用来查询索引
+        IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+        // 4. 创建Query对象 封装查询信息
+        Query query = new TermQuery(new Term("descs",q));
+        // 5. 执行查询 返回TopDocs结果集
+        TopDocs topDocs = indexSearcher.search(query, 10);
+        System.out.println("查询 "+q+" 共查询到"+topDocs.totalHits.value+"条记录");
+        // 6. 遍历结果集
+        for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            // 7. 获取文档ID
+            int docId = scoreDoc.doc;
+            // 8. 根据文档ID获取文档数据
+            Document document = indexSearcher.doc(docId);
+            // 9. 获取查询的索引内容
+            System.out.println(document.get("ids"));
+            System.out.println(document.get("citys"));
+            System.out.println(document.get("descs"));
+        }
+        // 10. 关闭IndexReader对象
+        indexReader.close();
+    }</code>
+</pre>
+
+<!-- 请勿在项目正式环境中引用该 layui.js 地址 -->
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use('code', function(){
+        layui.code({
+            "title":"代码片段"
+        });
+    });
+</script>
+
+</body>
+</html>

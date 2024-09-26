@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="keywords" content="java在线培训机构，java学习，java视频教程">
+    <meta name="keywords" content="java在线，java学习，java教程">
     <meta name="description" content="ETJava课堂是高品质的Java视频课程平台。为励志成为Java全栈工程师的程序员们，提供优质的后端技术、前端技术、数据库、服务器视频教程。">
     <link rel="Shortcut Icon" type="image/x-icon" href="/images/favicon.ico">
-    <title th:text="${application.propertyMap['k1']}+'|'+${application.propertyMap['k2']}"></title>
+    <title th:text="${application.propertyMap['k1']}+' | '+${application.propertyMap['k2']}"></title>
     <link rel="stylesheet" href="/layui/css/layui.css"/>
     <link rel="stylesheet" href="/css/css.css"/>
     <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
@@ -64,7 +64,7 @@
 <div class="header" th:include="common/menu::#m" />
 
 <!--轮播图-->
-<div class="w1220 carousel" id="contentbody">
+<div class="w1220 carousel" id="contentbody" >
     <div class="w1220 carousel">
         <div class="layui-carousel" id="test10">
             <div carousel-item="">
@@ -86,10 +86,11 @@
 <script src="/layui/layui.js"></script>
 <script src="/js/jquery.js"></script>
 <script src="/js/common.js"></script>
+<script src="/js/framework.js"></script>
 <script>
     layui.use(['carousel','element','form','table'], function(){
         var carousel = layui.carousel;
-
+        var element = layui.element.init(); // 导航相关
 
         //图片轮播
         carousel.render({

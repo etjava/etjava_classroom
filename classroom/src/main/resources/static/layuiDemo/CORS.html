@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>处理跨域</title>
+</head>
+<body>
+<script src="/js/jquery.js"></script>
+    <script>
+        $(function (){
+            /*
+            * 后台需要放行options请求
+            * // 修改拦截器类，排除Options请求
+                public class CustomInterceptor implements HandlerInterceptor {
+                    @Override
+                    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+                        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+                            return true;
+                        }
+                        // 其他业务逻辑
+                        return true;
+                    }
+                }
+            * */
+            $.ajax({
+                url: 'http://localhost/LoginRegister/Test', // userInfo2不存在跨域
+                dataType: 'json',
+                method:"GET",
+                success: function(response) {
+                    console.log(response);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8"/>
+<link rel="icon" href="/images/favicon.ico">
+<meta name="keywords" th:content="${title}">
+<meta name="description" th:content="${title}">
+<link href="/images/favicon.ico" rel="SHORTCUT ICON">
+<title th:text="${application.propertyMap['k1']}+' | '+${application.propertyMap['k20']}"></title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/share.min.css">
+
+<link rel="stylesheet" href="/ckeditor/highlight11.6/default.min.css">
+<script src="/ckeditor/highlight11.6/highlight.min.js"></script>
+
+<!-- code高亮模块CSS  黑色背景
+<link rel="stylesheet" type="text/css"
+      href="/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css" />-->
+<!-- code高亮模块JS -->
+<script type="text/javascript" src="/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js"></script>
+<head>
+<body class="layui-layout-body">
+
+<div class="layui-layout layui-layout-admin">
+    <!--导航菜单-->
+    <div class="layui-header">
+        <div class="header" th:include="common/menu::#m" />
+    </div>
+
+    <!--左侧树形菜单-->
+    <div class="layui-side" style="margin-top: 2.6%;background-color: #f5f5f5;width: 300px">
+        <div class="layui-side-scroll" style="background-color: #f5f5f5;width: 300px">
+            <ul id="mybatisTree" style="background-color: #eee;overflow: hidden; "></ul>
+        </div>
+    </div>
+
+    <!--中间内容主体 tab-->
+    <div class="layui-body" style="padding: 2% 7%">
+        <div class="layui-tab" lay-filter="tabDemo" lay-allowClose="true">
+            <!--tab标题-->
+            <ul class="layui-tab-title">
+                <!--<li class="layui-this"><i class="layui-icon" style=" color: #1E9FFF;">&#xe68e;</i> 首页</li>-->
+                <li class="layui-this" >首页</li>
+            </ul>
+            <!--tab内容-->
+            <div class="layui-tab-content" id="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <div style="text-align: center">
+                        <img src="/myIcons/mybatis-logo.png" width="200px;">
+                        <table class="layui-table" lay-skin="nob" style="text-align: left; color: #00CB08; margin-top: 100px">
+                            <tr>
+                                <td style="font-size: 17px;">MyBatis 是一款优秀的持久层框架，它支持自定义 SQL、存储过程以及高级映射。</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 17px;">MyBatis 免除了几乎所有的 JDBC 代码以及设置参数和获取结果集的工作。</td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 17px;">MyBatis 可以通过简单的 XML 或注解来配置和映射原始类型、接口和 Java POJO（Plain Old Java Objects，普通老式 Java 对象）为数据库中的记录。</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--页面底部-->
+    <div class="layui-footer" style="background-color: #f5f5f5;text-align: center;height: 40px">
+        <!-- 底部固定区域 -->
+        © etjava.org.cn
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/ckeditor/ckeditor.js"></script>
+<script th:inline="javascript">
+    layui.use(['tree', 'element','jquery'],function(){
+        var tree = layui.tree;
+        var element = layui.element;
+        var $ = layui.jquery;
+        var tabIds={};
+        // 渲染树形菜单
+        tree.render({
+            elem: '#mybatisTree',
+            data: getData([[${typeId}]]), // 获取后台传递的类别ID
+            click: function(obj){
+                var nodeData = obj.data; // 获得当前点击的节点数据
+                var title = nodeData.title;
+                var layId = nodeData.id;
+                // 检查是否为父节点，父节点不打开选项卡
+                if(nodeData.children){
+                    return false;
+                }
+                // 判断tab是否已经打开
+                if (tabIds[layId]) {
+                    element.tabChange('tabDemo', layId); // 如果已经打开，则切换
+                } else {
+                    // 添加新的 tab
+                    element.tabAdd('tabDemo', {
+                        title: title,
+                        // content: '内容 ' + layId,
+                        content: '<div id="tabContent_' + layId + '">' +
+                            '<div style="text-align: center;margin: 20%;color: #9a2fbd;font-size: 32px">数据正在加载中...</div>' +
+                            '</div>',
+                        id: layId // 这里使用 layId 作为 tab 的内部 id
+                    });
+
+                    // 发送请求获取数据
+                    $.ajax({
+                        //url: "/myIcons/test.html?id="+layId, // 直接请求页面
+                        url: nodeData.href+layId, // 直接请求页面
+                        method:"get",
+                        success: function(res){
+                            var content = res.content;
+                            if(content==null){
+                                content="数据正在编辑中...";
+                            }
+                            //console.log(content)
+                            $('#tabContent_' + layId).html(content);
+                            element.tabChange('tabDemo', layId); // 切换到当前tab
+                        }
+                    });
+                    tabIds[layId] = true; // 将 layId 存储在全局对象中
+                    element.tabChange('tabDemo', layId); // 切换到新添加的 tab
+                }
+
+                // 延时执行目的是确保页面中code标签加载完成 否则无法通过遍历追加样式
+                setTimeout(function() {
+                    addCodeCls(layId);// 调用追加样式
+                }, 500); // 延时2000毫秒（2秒）执行
+            }
+        });
+        // 动态给code标签追加class样式 html()方法会将接收到的内容转义在输出 因此不能高亮 这里手动追加样式
+        function addCodeCls(layId){
+            const codeElements = document.querySelectorAll('code');
+            codeElements.forEach(code => {
+                code.classList.add('hljs');
+            });
+        }
+        // 关闭标签页的函数
+        // function closeTab(index) {
+        //     // 删除对应的Tab项
+        //     element.tabDelete('tabDemo', index);
+        //     // 确保删除操作不会阻止标签页的再次打开
+        //     // 如果有必要，可以在这里添加代码以允许标签页重新打开
+        // }
+        //
+        // // 在需要关闭标签页的地方调用closeTab函数
+        // closeTab('tabIndex');
+        element.on('tabDelete(tabDemo)', function(data){
+            // 点击关闭时会触发这里，需要在这个地方移除掉打开的tabId 否则再次点击时不会生效
+            console.log(data.elem); //得到当前的Tab大容器
+        });
+    });
+    function getData(typeId){
+        var data = [];
+        $.ajax({
+            //url: "/myIcons/treeDemo3.json",    //后台数据请求地址
+            url: "/framework/menu/"+typeId,    //后台数据请求地址
+            type: "get",
+            async:false,
+            success: function(resut){
+                data = resut[0]; // 后台数据转换 直接获取第一个就可以
+                if(data==''){
+                    developing();
+                }
+            }
+        });
+        return data;
+    }
+
+
+
+    $(function () {
+        // 初始化代码高亮
+        hljs.initHighlightingOnLoad();
+    });
+</script>
+<style>
+    /* 修改树形控件的背景色 */
+    .layui-tree {
+        background-color: #f5f5f5; /* 浅灰色背景 */
+    }
+
+    /*修改字体颜色*/
+    .layui-tree-txt {
+        color: #1F4718FF !important; /* 红色字体 */
+    }
+
+    /* 修改tab标题栏的背景色 */
+    .layui-tab-title {
+        background-color: #ffffff; /* 白色背景 */
+    }
+
+    /* 修改单个tab项的背景色 */
+    .layui-tab-title li {
+        background-color: #ffffff; /* 白色背景 */
+    }
+
+    /* 修改激活状态的tab项的背景色 */
+    .layui-tab-title li.layui-this {
+        background-color: #17CA4A39; /* 深一点的灰色背景 */
+    }
+
+
+</style>
+</body>
+</html>

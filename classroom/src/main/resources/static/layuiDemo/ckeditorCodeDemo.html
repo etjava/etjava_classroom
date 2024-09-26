@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ckeditor代码高亮</title>
+    <link rel="stylesheet" href="/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/css/css.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+    <link rel="stylesheet" href="/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/share.min.css">
+
+    <link rel="stylesheet" href="/ckeditor/highlight11.6/default.min.css">
+    <script src="/ckeditor/highlight11.6/highlight.min.js"></script>
+
+    <!-- code高亮模块CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="/ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css" />
+    <!-- code高亮模块JS -->
+    <script type="text/javascript"
+            src="/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js"></script>
+</head>
+<body class="layui-layout-body">
+
+<div style="padding: 30px">
+    <h1><strong>创建索引</strong></h1>
+
+    <pre>
+    <code class="language-java">// 创建索引库
+    public static void createIndex()throws Exception{
+        // 1. 创建Directory对象 封装索引库所在位置
+        Directory directory = FSDirectory.open(Paths.get("D://lucene6"));
+        // 2. 创建IndexWriterConfig对象 配置中文分析器SmartChineseAnalyzer
+        IndexWriterConfig config = new IndexWriterConfig(new SmartChineseAnalyzer());
+        // 3. 创建IndexWriter对象 用来向索引库中写索引
+        IndexWriter writer = new IndexWriter(directory,config);
+        // 4. 定义测试数据
+        Integer[] ids = {1,2,3,4};
+        String[] citys = {"广州","深圳","佛山","惠州"};
+        String[] descs = {
+                "广州是广东省的省会城市",
+                "深圳是特区城市",
+                "佛山是美食城市",
+                "惠州是历史悠久的城市"
+        };
+        // 5. 向索引库中写索引
+        for (int i=0;i&lt;ids.length;i++) {
+            // 6. 创建文档对象
+            Document document = new Document();
+            // 7. 将原始数据添加到文档域
+            TextField fieldId = new TextField("ids",String.valueOf(ids[i]), Field.Store.YES);
+            TextField fieldCitys = new TextField("citys",citys[i], Field.Store.YES);
+            TextField fieldDesc = new TextField("descs",descs[i], Field.Store.YES);
+            // 8. 将文档域添加到文档中
+            document.add(fieldId);
+            document.add(fieldCitys);
+            document.add(fieldDesc);
+            // 9. 添加索引到索引库
+            writer.addDocument(document);
+        }
+        int ramDocs = writer.numRamDocs();
+        // 10. 关闭写索引对象
+        writer.close();
+
+        System.out.println("一个写了 "+ramDocs+" 个文档");
+    }</code></pre>
+
+    <h1>luke工具查看创建出来的索引</h1>
+
+    <p><img alt="" src="https://cdn.jsdelivr.net/gh/etjava/TyporaPIC/img/202404051418453.png" style="height:680px; width:950px" /></p>
+
+    <h1>查询索引</h1>
+
+    <pre>
+<code class="language-java">/**
+     * 查询索引
+     * @param indexDir 索引库的位置
+     * @param q 要查询的内容
+     * @throws Exception
+     */
+    public static void searchIndex(String indexDir,String q) throws Exception{
+        // 1. 创建Directory镀锡 封装索引库位置
+        Directory directory = FSDirectory.open(Paths.get(indexDir));
+        // 2. 创建IndexReader对象 用来读取索引信息
+        IndexReader indexReader = DirectoryReader.open(directory);
+        // 3. 创建IndexSearch对象 用来查询索引
+        IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+        // 4. 创建Query对象 封装查询信息
+        Query query = new TermQuery(new Term("descs",q));
+        // 5. 执行查询 返回TopDocs结果集
+        TopDocs topDocs = indexSearcher.search(query, 10);
+        System.out.println("查询 "+q+" 共查询到"+topDocs.totalHits.value+"条记录");
+        // 6. 遍历结果集
+        for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            // 7. 获取文档ID
+            int docId = scoreDoc.doc;
+            // 8. 根据文档ID获取文档数据
+            Document document = indexSearcher.doc(docId);
+            // 9. 获取查询的索引内容
+            System.out.println(document.get("ids"));
+            System.out.println(document.get("citys"));
+            System.out.println(document.get("descs"));
+        }
+        // 10. 关闭IndexReader对象
+        indexReader.close();
+    }</code></pre>
+
+    <h1>查询结果</h1>
+
+    <p><img alt="" src="https://cdn.jsdelivr.net/gh/etjava/TyporaPIC/img/202404051413036.png" style="height:217px; width:556px" /></p>
+
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/ckeditor/ckeditor.js"></script>
+<script>
+    layui.use(['tree', 'element','jquery'],function(){
+        var tree = layui.tree;
+        var element = layui.element;
+        var $ = layui.jquery;
+        var tabIds={};
+
+        // 渲染树形菜单
+        tree.render({
+            elem: '#mybatisTree',
+            data: getData(1), // 获取后台传递的类别ID
+            click: function(obj){
+                var nodeData = obj.data; // 获得当前点击的节点数据
+                var title = nodeData.title;
+                var layId = nodeData.id;
+                // 检查是否为父节点，父节点不打开选项卡
+                if(nodeData.children){
+                    return false;
+                }
+                // 判断tab是否已经打开
+                if (tabIds[layId]) {
+                    element.tabChange('tabDemo', layId); // 如果已经打开，则切换
+                } else {
+                    // 添加新的 tab
+                    element.tabAdd('tabDemo', {
+                        title: title,
+                        // content: '内容 ' + layId,
+                        content: '<div id="tabContent_' + layId + '">正在加载数据中...</div>',
+                        id: layId // 这里使用 layId 作为 tab 的内部 id
+                    });
+
+                    // 根据ID获取数据 展示页面相同 只是数据不同
+                    // 方式1 这里发送请求到另个页面中在继续发送数据的请求 这里需要将id传递过去 那边需要根据id获取数据
+                    // 方式2 这里直接拼接一个页面模板 需要注意代码高亮
+                    // 发送请求获取数据
+                    $.ajax({
+                        //url: "/myIcons/test.html?id="+layId, // 直接请求页面
+                        url: nodeData.href+layId, // 直接请求页面
+                        method:"get",
+                        success: function(res){
+                            var content = res.content;
+                            // $('#tabContent_' + layId).html(content);// 将返回的数据添加到tab中 如果需要返回列表数据 则需要手动拼装完成后在这里统一返回
+
+                            /* 方式1 手动拼接页面内容 该方式不推荐 不利于页面复杂性数据渲染 因为所有的数据都要手动拼接
+                            var userTable='<table class="layui-table">' +
+                                '<tr>' +
+                            '      <th>id</th>' +
+                            '      <th>username</th>' +
+                            '      <th>email</th>' +
+                            '    </tr> ' +
+                            '<tr>' +
+                            '      <th>'+content.id+'</th>' +
+                            '      <th>'+content.username+'</th>' +
+                            '      <th>'+content.email+'</th>' +
+                            '    </tr> ' +
+                                '</table>';
+
+                            $('#tabContent_' + layId).html(userTable);// 将用户名显示到打开的tab中*/
+
+                            /*
+                            * 方式2 请求后台返回到页面 然后在tab页中加载返回的页面
+                            * 不推荐 与方式1相似 只是页面中数据的拼接转成后台实现，或是只能使用静态页面
+                            * 或将数据放到application作用域 因此不推荐
+                            * */
+
+                            // 方式3未实现 请求后台数据 直接加载到页面中 这里需要固定一个数据展示的模板 或后台返回的数据直接展示 但需要代码块高亮支持
+
+                            $('#tabContent_' + layId).html(content);
+                            element.tabChange('tabDemo', layId); // 切换到当前tab
+                        }
+                    });
+                    tabIds[layId] = true; // 将 layId 存储在全局对象中
+                    element.tabChange('tabDemo', layId); // 切换到新添加的 tab
+                }
+            }
+        });
+    });
+    function getData(typeId){
+        var data = [];
+        $.ajax({
+            //url: "/myIcons/treeDemo3.json",    //后台数据请求地址
+            url: "/framework/menu/"+typeId,    //后台数据请求地址
+            type: "get",
+            async:false,
+            success: function(resut){
+                data = resut[0]; // 后台数据转换 直接获取第一个就可以
+                if(data==''){
+                    developing();
+                }
+            }
+        });
+        return data;
+    }
+    $(function () {
+        // 初始化代码高亮
+        hljs.initHighlightingOnLoad();
+        // CKEDITOR.inline('editor');
+    });
+</script>
+
+</body>
+</html>

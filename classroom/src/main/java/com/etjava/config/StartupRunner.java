@@ -1,6 +1,7 @@
 package com.etjava.config;
 
 import com.etjava.entity.AdminMenu;
+import com.etjava.entity.FrameworkType;
 import com.etjava.service.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -47,6 +48,9 @@ public class StartupRunner implements CommandLineRunner, ServletContextListener 
     @Autowired
     private BlogTypeService blogTypeService;
 
+    @Autowired
+    private FrameworkTypeService frameworkTypeService;
+
     @Override
     public void run(String... args) throws Exception {
         this.loadData();// 加载菜单数据
@@ -92,6 +96,10 @@ public class StartupRunner implements CommandLineRunner, ServletContextListener 
         map.put("start",0);
         map.put("size",100);
         application.setAttribute("blogTypeList",blogTypeService.list(map));
+
+
+        /*框架类别按钮加载*/
+        application.setAttribute("frameworkTypeList",frameworkTypeService.list(null));
     }
 
     // 初始化

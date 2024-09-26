@@ -60,7 +60,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/exam/**","/games","/games/**","/images/pvz/**","/images/pvz/interface/**",
                         "/images/pvz/Zombies/**","/ext/**","/crawlerImages/**",
                         "/course/**","/article/**","/wap/**","/demo/**","/graduation/**",
-                        "/myIcons/**").permitAll()
+                        "/myIcons/**","/framework/**","/admin/framework/**","/layuiDemo/**").permitAll()
                 .anyRequest().authenticated() // 其他所有访问路径需要身份认证
                 .and()
                 .formLogin()

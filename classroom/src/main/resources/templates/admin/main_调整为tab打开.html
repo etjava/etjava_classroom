@@ -160,7 +160,7 @@
         function CustomRightClick(id) {
             //取消右键  rightmenu属性开始是隐藏的 ，当右击的时候显示，左击的时候隐藏
             $('.layui-tab-title li').on('contextmenu', function() { return false; });
-            $('.layui-tab-title,.layui-tab-title li').click(function () {
+            $('.layui-tab-title li').click(function () { // 隐藏关闭按钮
                 $('.rightmenu').hide();
             });
             //桌面点击右击

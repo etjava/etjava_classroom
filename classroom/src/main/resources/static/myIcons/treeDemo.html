@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8"/>
+<link rel="icon" href="/images/favicon.ico">
+<meta name="keywords" th:content="${title}">
+<meta name="description" th:content="${title}">
+<link href="/images/favicon.ico" rel="SHORTCUT ICON">
+<title th:text="${application.propertyMap['k1']}+' | '+${application.propertyMap['k20']}"></title>
+<link rel="stylesheet" href="/layui/css/layui.css"/>
+<link rel="stylesheet" href="/css/css.css"/>
+<link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/share.min.css">
+</head>
+<body>
+<!--tree菜单显示-->
+<div class="layui-side" style="background-color: #f5f5f5">
+  <div class="layui-side-scroll">
+    <ul id="treeDemo" class="layui-tree" lay-filter="treeDemo"></ul>
+  </div>
+</div>
+
+<!--tab页面-->
+<div class="layui-body" style="padding: 15px;">
+  <div class="layui-tab" lay-filter="tabDemo" lay-allowClose="true">
+    <ul class="layui-tab-title">
+      <li class="layui-this">首页</li>
+    </ul>
+    <div class="layui-tab-content">
+      <div class="layui-tab-item layui-show">首页内容
+        <pre>
+          1. 点击根菜单时不要打开tab页
+          2. 背景色调整下
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script src="/layui/layui.all.js"></script>
+<script src="/js/jquery.js"></script>
+<script src="/js/jquery.share.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/framework.js"></script>
+<script>
+  layui.use(['tree', 'element','jquery'], function(){
+    var tree = layui.tree;
+    var element = layui.element;
+    var $ = layui.jquery;
+    var tabIds={};
+
+    // 渲染树形菜单
+    tree.render({
+      elem: '#treeDemo',
+      data: getData(),
+      click: function(obj){
+        var nodeData = obj.data; // 获得当前点击的节点数据
+        var title = nodeData.title;
+        var layId = nodeData.id;
+        // 检查是否为父节点，父节点不打开选项卡
+        if(nodeData.children){
+          return false;
+        }
+
+        // 判断tab是否已经打开
+        if (tabIds[layId]) {
+          element.tabChange('tabDemo', layId); // 如果已经打开，则切换
+        } else {
+          // 添加新的 tab
+          element.tabAdd('tabDemo', {
+            title: title,
+            content: '内容 ' + layId,
+            id: layId // 这里使用 layId 作为 tab 的内部 id
+          });
+          tabIds[layId] = true; // 将 layId 存储在全局对象中
+          element.tabChange('tabDemo', layId); // 切换到新添加的 tab
+
+        }
+      }
+    });
+
+    function getData(){
+      var data = [];
+      $.ajax({
+        url: "/myIcons/treeDemo.json",    //后台数据请求地址
+        type: "get",
+        async:false,
+        success: function(resut){
+          data = resut;
+        }
+      });
+      return data;
+    }
+  });
+</script>
+<style>
+  /* 修改树形控件的背景色 */
+  .layui-tree {
+    background-color: #f5f5f5; /* 浅灰色背景 */
+
+  }
+
+  /*.layui-side{
+    width: 400px !important; !* 设置树形菜单的宽度 *!
+    z-index: -1000;
+  }
+  .layui-side .layui-side-scroll {
+    width: 400px !important; !* 设置树形菜单的宽度 *!
+    z-index: -1000;
+  }
+  .layui-side .layui-side-scroll .layui-tree{
+    width: 400px !important; !* 设置树形菜单的宽度 *!
+    z-index: -1000;
+  }*/
+
+
+  /*修改字体颜色*/
+  .layui-tree-txt {
+    color: #ff0000 !important; /* 红色字体 */
+  }
+
+
+
+  /* 修改tab标题栏的背景色 */
+  .layui-tab-title {
+    background-color: #ffffff; /* 白色背景 */
+  }
+
+  /* 修改单个tab项的背景色 */
+  .layui-tab-title li {
+    background-color: #ffffff; /* 白色背景 */
+  }
+
+  /* 修改激活状态的tab项的背景色 */
+  .layui-tab-title li.layui-this {
+    background-color: #17CA4A39; /* 深一点的灰色背景 */
+  }
+
+
+</style>
+</body>
+</html>

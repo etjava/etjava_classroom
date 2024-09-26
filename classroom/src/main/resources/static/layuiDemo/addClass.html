@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>给指定标签追加样式</title>
+</head>
+<body>
+
+<div id="userList">
+  <div>张三</div>
+  <div>李四</div>
+  <div>王五</div>
+</div>
+
+<script>
+    // 假设这是从服务器接收到的用户列表
+    var users = ["张三", "王五"];
+
+    // 选择所有用户名字的div标签
+    var userDivs = document.querySelectorAll("#userList > div");
+
+    // 遍历接收到的用户列表
+    users.forEach(function(user) {
+        // 遍历页面上的div标签
+        userDivs.forEach(function(div) {
+            // 如果div的文本内容等于用户列表中的用户名，则添加类
+            if (div.textContent === user) {
+                div.classList.add("user-class");
+            }
+        });
+    });
+
+</script>
+
+<style>
+    .user-class{
+        color: red;
+    }
+</style>
+</body>
+</html>

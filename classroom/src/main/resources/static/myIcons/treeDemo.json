@@ -1,0 +1,156 @@
+[{
+  "title": "MyBatis参考文档(202409)",
+  "id": 1,
+  "alias": "mybatis",
+  "spread": true,
+  "children": [{
+    "title": "简介",
+    "id": 11,
+    "href": "http://www.baidu.com",
+    "alias": "简介"
+  }, {
+    "title": "快速入门",
+    "id": 12
+  }, {
+    "title": "XML配置",
+    "id": 13,
+    "spread": true,
+    "children": [{
+      "title": "属性介绍",
+      "id":"131",
+      "href": "http://www.sun.com"
+    },{
+      "title": "设置",
+      "id":"132"
+    },{
+      "title": "类型别名",
+      "id":"133"
+    },{
+      "title": "类型处理器",
+      "id":"134"
+    },{
+      "title": "对象工厂",
+      "id":"135"
+    },{
+      "title": "插件",
+      "id":"136"
+    },{
+      "title": "环境配置",
+      "id":"137"
+    },{
+      "title": "映射器",
+      "id":"138"
+    },{
+      "title": "数据库厂商标识",
+      "id":"139"
+    }]
+  },{
+    "title": "XML映射器",
+    "id": 14,
+    "children": [{
+      "title": "select",
+      "id":"141"
+    },{
+      "title": "insert/update/delete",
+      "id":"142"
+    },{
+      "title": "参数",
+      "id":"143"
+    },{
+      "title": "结果集映射",
+      "id":"144"
+    },{
+      "title": "自动映射",
+      "id":"145"
+    },{
+      "title": "缓存",
+      "id":"146"
+    }]
+  },{
+    "title": "动态SQL",
+    "id": 15,
+    "children": [{
+      "title": "if标签",
+      "id": 151
+    },{
+      "title": "where标签",
+      "id": 152
+    },{
+      "title": "where标签",
+      "id": 153
+    },{
+      "title": "choose、when、otherwise",
+      "id": 154
+    },{
+      "title": "trim标签",
+      "id": 155
+    },{
+      "title": "foreach标签",
+      "id": 156
+    },{
+      "title": "set标签",
+      "id": 157
+    },{
+      "title": "update标签",
+      "id": 158
+    }]
+  },{
+    "title": "Java API",
+    "id": 16,
+    "children": [{
+      "title": "目录结构",
+      "id": 161
+    },{
+      "title": "SqlSession",
+      "id": 162
+    }]
+  },{
+    "title": "SQL语句构建",
+    "id": 17
+  },{
+    "title": "日志",
+    "id": 18
+  }]
+}, {
+  "title": "MyBatis-Spring整合",
+  "id": 2,
+  "spread": false,
+  "children": [{
+    "title": "XXX",
+    "id": 21,
+    "spread": false,
+    "children": [{
+      "title": "XXX",
+      "id": 211,
+      "children": [{
+        "title": "XXX",
+        "id": 2111
+      }, {
+        "title": "XXX",
+        "id": 2112
+      }, {
+        "title": "XXX",
+        "id": 2113
+      }]
+    }, {
+      "title": "XXX",
+      "id": 212
+    }, {
+      "title": "XXX",
+      "id": 213
+    }]
+  }, {
+    "title": "XXX",
+    "id": 22,
+    "children": [{
+      "title": "XXX",
+      "id": 221
+    }, {
+      "title": "XXX",
+      "id": 222
+    }, {
+      "title": "XXX",
+      "id": 223
+    }]
+  }]
+}]
